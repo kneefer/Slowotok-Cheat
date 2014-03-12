@@ -135,7 +135,7 @@ namespace SłowotokCheat
             }
             catch (FileNotFoundException ex)
             {
-                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory!", ex.FileName));
+                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory!", ex.FileName) , "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -147,7 +147,7 @@ namespace SłowotokCheat
         {
             if (!vm.IsBaseLoaded)
             {
-                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Load the base first!");
                 return;
             }
 

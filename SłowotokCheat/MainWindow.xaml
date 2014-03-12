@@ -31,7 +31,7 @@
         
         <Expander IsExpanded="{Binding ElementName=resultsExpander, Path=IsExpanded, Converter={StaticResource InvertBooleanConverter}}" Grid.Row="2" Header="Game board" Grid.ColumnSpan="2">
             <StackPanel>
-                <c:GridOfTextBoxesControl IsEnabled="{Binding IsBaseLoaded}" x:Name="grid" ArrayOfChars="{Binding ArrayOfChars}" EnterPressed="validateRequirementsToProcessing" />
+                <c:GridOfTextBoxesControl Margin="0 5 0 0" IsEnabled="{Binding IsBaseLoaded}" x:Name="grid" ArrayOfChars="{Binding ArrayOfChars}" EnterPressed="validateRequirementsToProcessing" />
                 <Button Visibility="{Binding IsBaseLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0 5 0 5" Content="Find all the possibilities"
                     HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="validateRequirementsToProcessing" />

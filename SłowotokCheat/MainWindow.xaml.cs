@@ -1,8 +1,11 @@
-﻿using System;
+﻿using SłowotokCheat.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,91 +16,87 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace SłowotokCheat
 {
-    struct IntPoint
-    {
-        public IntPoint(int x, int y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
-
-        public int X, Y;
-    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<string> toCheck = new List<string>();
+        #region Properties and Constants Area
+
+        private MainPageViewModel vm = new MainPageViewModel();
+
+        public Dictionary<string, object> Dictionary { get; set; }
+
+        public const string FileName = "slowa.txt";
+
+        private char[,] arrayToProcess { get; set; }
+
+        #endregion
 
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = vm;
+            Dictionary = new Dictionary<string, object>();
+            loadButton.Focus();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async Task BeginProcessing()
         {
-            var tablica = new char[4, 4] { 
-                { 'Ł', 'R', 'Y', 'W' },
-                { 'P', 'Z', 'C', 'Ź' },
-                { 'R', 'R', 'I', 'Z' },
-                { 'I', 'Ć', 'E', 'P' }
-            };
+            if (vm.InProgress) return;
+
+            vm.ShowResults = true;
+            vm.InProgress = true;
+            vm.FoundWords.Clear();
 
             for (int x = 0; x < 4; x++)
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    generateWords(tablica, tablica[x,y].ToString(), x, y, recursLvl: 10);
-                }
-            } 
-
-            toCheck = toCheck.Distinct().ToList();
-            toCheck.Sort();
-
-            using (StreamReader file = new StreamReader("slowa.txt"))
-            {
-                string line;
-                
-                while ((line = await file.ReadLineAsync()) != null)
-                {
-                    foreach (var item in toCheck)
-                    {
-                        if (item.StartsWith(line))
-                        {
-                            rich.AppendText(line);
-                            break;
-                        }
-                    }
+                    await Task.Factory.StartNew(() => generateWords(arrayToProcess, arrayToProcess[x, y].ToString(), x, y));
                 }
             }
+
+            vm.InProgress = false;
         }
 
-        private void generateWords(char[,] tablica, string slowo, int x, int y, int recursLvl)
+        private void generateWords(char[,] array, string word, int x, int y, int recursLvl = 16)
         {
-            char[,] _tablica = ((char[,])tablica.Clone()); // cloning the array
-            _tablica[x, y] = '_';
+            char[,] _array = ((char[,])array.Clone()); // cloning the array
+            _array[x, y] = '_';
 
-            var possibilities = isMovePossible(_tablica, x, y);
+            var possibilities = isMovePossible(_array, x, y);
 
-            if (possibilities.Count == 0 || recursLvl == 1)
+            if (word.Length >= 3 && Dictionary.ContainsKey(word))
             {
-                toCheck.Add(slowo);
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null)
+                    {
+                        vm.FoundWords.AddSorted(
+                            new RecordModel() { Word = word, Length = word.Length },
+                            (a, b) => b.Length.CompareTo(a.Length)
+                        );
+                    }
+                }));
             }
-            else
+
+
+            if (possibilities.Count != 0 && recursLvl != 1)
             {
                 foreach (var nextMove in possibilities)
                 {
                     // the recursion
-                    generateWords(_tablica, slowo + _tablica[nextMove.X, nextMove.Y], nextMove.X, nextMove.Y, recursLvl-1);
+                    generateWords(_array, word + _array[nextMove.X, nextMove.Y], nextMove.X, nextMove.Y, recursLvl-1);
                 }
             }
         }
 
-        private List<IntPoint> isMovePossible(char[,] tablica, int x, int y)
+        private List<IntPoint> isMovePossible(char[,] array, int x, int y)
         {
             var possibilities = new List<IntPoint>();
 
@@ -105,11 +104,62 @@ namespace SłowotokCheat
             {
                 for (int b = (y - 1); b <= (y + 1); b++)
                 {
-                    if (a >= 0 && a < 4 && b >= 0 && b < 4 && tablica[a,b] != '_') possibilities.Add(new IntPoint(a, b));
+                    if (a >= 0 && a < 4 && b >= 0 && b < 4 && array[a,b] != '_')
+                        possibilities.Add(new IntPoint(a, b));
                 }
             }
-
+            
             return possibilities;
+        }
+
+        private async void LoadTheBase_Click(object sender, RoutedEventArgs e)
+        {
+            if (vm.InProgress) return;
+            vm.InProgress = true;
+
+            try
+            {
+                using (StreamReader file = new StreamReader("slowa.txt"))
+                {
+                    string line;
+
+                    while ((line = await file.ReadLineAsync()) != null)
+                    {
+                        Dictionary.Add(line, null);
+                    }
+                }
+
+                vm.IsBaseLoaded = true;
+                grid.Focus();
+                this.Width += 1;
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory!", ex.FileName));
+            }
+            finally
+            {
+                vm.InProgress = false;
+            }
+        }
+
+        private async void validateRequirementsToProcessing(object sender, RoutedEventArgs e)
+        {
+            if (!vm.IsBaseLoaded)
+            {
+                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!vm.ValidateArray())
+            {
+                MessageBox.Show("Fill all the fields first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            this.arrayToProcess = vm.ArrayOfChars.ConvertTo2DArray(4, 4);
+
+            await BeginProcessing();
         }
     }
 }

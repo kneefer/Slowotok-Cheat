@@ -53,54 +53,22 @@ namespace GridOfTextBoxesControl
             foreach (var item in textBoxes)
             {
                 item.Text = "";
-                item.GotKeyboardFocus += item_GotKeyboardFocus;
-
-                if (!textBoxes.Last().Equals(item))
-                    item.KeyUp += item_KeyUp;
-                else
-                    item.KeyUp += lastItem_KeyUp;
+                item.KeyDown += item_KeyDown;
+                item.KeyUp += item_KeyUp;
             }
         }
 
-        void item_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        void item_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox txtBox = sender as TextBox;
-
-            txtBox.SelectionStart = 0;
-            txtBox.SelectionLength = txtBox.Text.Length;
-        }
-
-        private void lastItem_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.RightAlt || e.Key == Key.LeftAlt || e.Key == Key.System)
-            {
-                e.Handled = true;
-                return;
-            }
-
-            TextBox txtBox = sender as TextBox;
-            char mem = '0';
-
-            if (txtBox.Text.Length > 0)
-                mem = txtBox.Text.ToUpper()[0];
-
-            txtBox.Text = "";
-
-            if (Regex.IsMatch(mem.ToString(), @"^[A-ZzżźćńółęąśŻŹĆŃĄŚĘŁÓ]$"))
-            {
-                txtBox.Text = mem.ToString();
-            }
-            else
-            {
-                txtBox.Text = "";
-            }
-
-            e.Handled = true;
+            txtBox.Select(0, 0);
         }
 
         void item_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.RightAlt || e.Key == Key.LeftAlt || e.Key == Key.System)
+            if (e.Key == Key.RightAlt ||
+                e.Key == Key.LeftAlt ||
+                e.Key == Key.System)
             {
                 e.Handled = true;
                 return;
@@ -108,6 +76,7 @@ namespace GridOfTextBoxesControl
 
             TextBox txtBox = sender as TextBox;
             char mem ='0';
+
             if(txtBox.Text.Length > 0)
                 mem = txtBox.Text.ToUpper()[0];
 
@@ -123,11 +92,7 @@ namespace GridOfTextBoxesControl
                 if (keyboardFocus != null)
                     keyboardFocus.MoveFocus(tRequest);
             }
-            else
-            {
-                txtBox.Text = "";
-            }
-            
+
             e.Handled = true;
         }
     }

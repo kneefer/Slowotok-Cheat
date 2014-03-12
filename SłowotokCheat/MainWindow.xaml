@@ -11,10 +11,6 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <util:InvertBooleanConverter x:Key="InvertBooleanConverter" />
         </Grid.Resources>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="89*"/>
-            <ColumnDefinition Width="48*"/>
-        </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,8 +20,10 @@
         </Grid.RowDefinitions>
 
         <Button IsEnabled="{Binding IsBaseLoaded, Converter={StaticResource InvertBooleanConverter}}"
-                Grid.Row="0" Content="Load the base of words to RAM (even 500MB)" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom" Click="LoadTheBase_Click" Grid.ColumnSpan="2" x:Name="loadButton" />
+                Grid.Row="0" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom" Click="LoadTheBase_Click" x:Name="loadButton">
+            <TextBlock>Load the base of words to RAM <LineBreak /> (the program needs about 170MB)</TextBlock>
+        </Button>
         <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Height="5"
                      Margin="0 5 0 5" IsIndeterminate="{Binding InProgress}" Grid.ColumnSpan="2" />
         

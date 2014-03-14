@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SłowotokCheat.WebConnection;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,6 @@ namespace SłowotokCheat
     /// </summary>
     public partial class App : Application
     {
+        public SlowotokWebActions WebActions { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace SłowotokCheat.Utilities
+namespace SłowotokCheat.Converters
 {
     class DivisionConverter : IValueConverter
     {

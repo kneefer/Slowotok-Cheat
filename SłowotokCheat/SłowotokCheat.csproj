@@ -57,16 +57,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BoardModel.cs" />
-    <Compile Include="MainPageViewModel.cs" />
-    <Compile Include="Utilities\DivisionConverter.cs" />
+    <Compile Include="Models\BoardModel.cs" />
+    <Compile Include="Models\MainPageViewModel.cs" />
+    <Compile Include="Converters\DivisionConverter.cs" />
     <Compile Include="Utilities\Extensions.cs" />
-    <Compile Include="Utilities\InvertBooleanConverter.cs" />
-    <Compile Include="Utilities\RecordModel.cs" />
-    <Compile Include="CookieAwareWebClient.cs">
+    <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\InvertBooleanConverter.cs" />
+    <Compile Include="Models\RecordModel.cs" />
+    <Compile Include="WebConnection\CookieAwareWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="WebActions.cs" />
+    <Compile Include="WebConnection\SlowotokWebActions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,7 +76,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Utilities\IntPoint.cs" />
+    <Compile Include="Models\IntPoint.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

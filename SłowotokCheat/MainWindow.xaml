@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Słowotok Cheat v1.0" SizeToContent="Height" Width="310"
         ResizeMode="NoResize" MaxHeight="700"
-        xmlns:util="clr-namespace:SłowotokCheat.Utilities"
+        xmlns:util="clr-namespace:SłowotokCheat.Converters"
         xmlns:c="clr-namespace:GridOfTextBoxesControl;assembly=GridOfTextBoxesControl">
     <Grid Margin="15 15">
         <Grid.Resources>
             <util:DivisionConverter x:Key="DivisionConverter" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <util:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <util:InvertBooleanConverter x:Key="InvertBooleanConverter" />
         </Grid.Resources>
 
@@ -20,18 +21,18 @@
         </Grid.RowDefinitions>
 
         <Button IsEnabled="{Binding IsBaseLoaded, Converter={StaticResource InvertBooleanConverter}}"
-                Grid.Row="0" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom" Click="LoadTheBase_Click" x:Name="loadButton">
+                Grid.Row="0" HorizontalAlignment="Stretch" Visibility="{Binding IsBaseLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter }}"
+                VerticalAlignment="Bottom" Margin="0 0 0 5" Click="LoadTheBase_Click" x:Name="loadButton">
             <TextBlock>Load the base of words to RAM <LineBreak /> (the program needs about 170MB)</TextBlock>
         </Button>
         <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Height="5"
-                     Margin="0 5 0 5" IsIndeterminate="{Binding InProgress}" Grid.ColumnSpan="2" />
+                     Margin="0 0 0 5" IsIndeterminate="{Binding InProgress}" Grid.ColumnSpan="2" />
         
         <Expander IsExpanded="{Binding ElementName=resultsExpander, Path=IsExpanded, Converter={StaticResource InvertBooleanConverter}}" Grid.Row="2" Header="Game board" Grid.ColumnSpan="2">
             <StackPanel>
                 <c:GridOfTextBoxesControl Margin="0 5 0 0" IsEnabled="{Binding IsBaseLoaded}" x:Name="grid" ArrayOfChars="{Binding ArrayOfChars}" EnterPressed="validateRequirementsToProcessing" />
                 <Button Visibility="{Binding IsBaseLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Margin="0 5 0 5" Content="Find all the possibilities"
+                    Margin="0 5 0 5" Content="Find all the possibilities" IsEnabled="{Binding InProgress, Converter={StaticResource InvertBooleanConverter}}"
                     HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="validateRequirementsToProcessing" />
             </StackPanel>
 

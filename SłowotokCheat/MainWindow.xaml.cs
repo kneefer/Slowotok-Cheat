@@ -43,6 +43,11 @@ namespace SłowotokCheat
             DataContext = vm;
             Dictionary = new Dictionary<string, object>();
             loadButton.Focus();
+
+            WebActions webActions = new WebActions("kneefer@gmail.com", "dupa123");
+            webActions.LogOn();
+            var myBoard = Newtonsoft.Json.JsonConvert.DeserializeObject<BoardModel>(webActions.Client.DownloadString("/play/board/"));
+            MessageBox.Show("dupa");
         }
 
         private async Task BeginProcessing()
@@ -57,7 +62,9 @@ namespace SłowotokCheat
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    await Task.Factory.StartNew(() => generateWords(arrayToProcess, arrayToProcess[x, y].ToString(), x, y));
+                    await Task.Factory.StartNew(() => {
+                        generateWords(arrayToProcess, arrayToProcess[x, y].ToString(), x, y);
+                    });
                 }
             }
 
@@ -92,6 +99,7 @@ namespace SłowotokCheat
                 {
                     // the recursion
                     generateWords(_array, word + _array[nextMove.X, nextMove.Y], nextMove.X, nextMove.Y, recursLvl-1);
+
                 }
             }
         }

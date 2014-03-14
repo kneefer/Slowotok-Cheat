@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SłowotokCheat", "SłowotokCheat\SłowotokCheat.csproj", "{4DC4760C-278C-43FD-9F59-39493BDFC4D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridOfTextBoxesControl", "GridOfTextBoxesControl\GridOfTextBoxesControl.csproj", "{C85E3614-5C36-4DD2-9B34-048D689768FE}"

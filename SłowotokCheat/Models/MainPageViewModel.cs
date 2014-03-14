@@ -18,7 +18,7 @@ namespace SłowotokCheat.Models
             IsBaseLoaded = false;
             FoundWords = new ObservableCollection<RecordModel>();
             InProgress = false;
-            ShowResults = false;
+            ShowingResults = false;
             ArrayOfChars = new char[4][]{
                 new char[4] {' ', ' ', ' ', ' '},
                 new char[4] {' ', ' ', ' ', ' '},
@@ -55,16 +55,16 @@ namespace SłowotokCheat.Models
             }
         }
 
-        private bool _showResults;
-        public bool ShowResults
+        private bool _showingResults;
+        public bool ShowingResults
         {
-            get { return _showResults; }
+            get { return _showingResults; }
             set
             {
-                if (value != _showResults)
+                if (value != _showingResults)
                 {
-                    _showResults = value;
-                    NotifyPropertyChanged("ShowResults");
+                    _showingResults = value;
+                    NotifyPropertyChanged("ShowingResults");
                 }
             }
         }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace SłowotokCheat
 {
@@ -38,7 +39,7 @@ namespace SłowotokCheat
         {
             if (vm.InProgress) return;
 
-            vm.ShowResults = true;
+            vm.ShowingResults = true;
             vm.InProgress = true;
             vm.FoundWords.Clear();
 
@@ -152,6 +153,27 @@ namespace SłowotokCheat
             this.arrayToProcess = vm.ArrayOfChars.ConvertTo2DArray(4, 4);
 
             await BeginProcessing();
+        }
+
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button login = (sender as Button);
+
+            
+
+            login.Click -= LoginButton_Click;
+            login.Click += LogoutButton_Click;
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button logout = (sender as Button);
+
+
+            logout.Content = "Login";
+            logout.Click -= LogoutButton_Click;
+            logout.Click += LoginButton_Click;
+            
         }
     }
 }

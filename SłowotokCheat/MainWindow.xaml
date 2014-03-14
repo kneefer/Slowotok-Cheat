@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -26,19 +27,40 @@
             <TextBlock>Load the base of words to RAM <LineBreak /> (the program needs about 170MB)</TextBlock>
         </Button>
         <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Height="5"
-                     Margin="0 0 0 5" IsIndeterminate="{Binding InProgress}" Grid.ColumnSpan="2" />
+                     Margin="0 0 0 5" IsIndeterminate="{Binding InProgress}" />
         
-        <Expander IsExpanded="{Binding ElementName=resultsExpander, Path=IsExpanded, Converter={StaticResource InvertBooleanConverter}}" Grid.Row="2" Header="Game board" Grid.ColumnSpan="2">
+        <Expander Grid.Row="2" Header="Automate filling the board by logging in">
+            <StackPanel>
+                <Grid Margin="20 0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="2" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                
+                    <TextBlock Margin="0 0 10 0" Text="Email" Grid.Row="0" Grid.Column="0" />
+                    <TextBlock Text="Hasło" Grid.Row="2" Grid.Column="0" />
+                    <TextBox Grid.Row="0" Grid.Column="1" />
+                    <TextBox Grid.Row="2" Grid.Column="1" />
+                </Grid>
+                <Button x:Name="LoginButton" Click="LoginButton_Click" Content="Login" Margin="70 5 70 0" />
+            </StackPanel>
+        </Expander>
+        
+        <Expander IsExpanded="{Binding ElementName=resultsExpander, Path=IsExpanded, Converter={StaticResource InvertBooleanConverter}}" Grid.Row="3" Header="Game board">
             <StackPanel>
                 <c:GridOfTextBoxesControl Margin="0 5 0 0" IsEnabled="{Binding IsBaseLoaded}" x:Name="grid" ArrayOfChars="{Binding ArrayOfChars}" EnterPressed="validateRequirementsToProcessing" />
                 <Button Visibility="{Binding IsBaseLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Margin="0 5 0 5" Content="Find all the possibilities" IsEnabled="{Binding InProgress, Converter={StaticResource InvertBooleanConverter}}"
                     HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="validateRequirementsToProcessing" />
             </StackPanel>
-
         </Expander>
 
-        <Expander x:Name="resultsExpander" IsExpanded="{Binding ShowResults}" Grid.Row="3" Header="Found matches" Grid.ColumnSpan="2">
+        <Expander x:Name="resultsExpander" IsExpanded="{Binding ShowingResults}" Grid.Row="4" Header="Found matches">
             <ListView ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                       HorizontalAlignment="Stretch" x:Name="lstFound"  FontFamily="Consolas"
                       ItemsSource="{Binding FoundWords}" Margin="0 5 0 0">

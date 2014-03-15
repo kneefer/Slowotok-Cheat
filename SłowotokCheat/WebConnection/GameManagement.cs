@@ -13,10 +13,8 @@ namespace SłowotokCheat.WebConnection
     {
         private const int TICK_INTERVAL_IN_MS = 1000;
         private int _intervalOfUpdatingStatus = 0;
-        private int _spanToWaitForNewBoard = 0;
 
         private DispatcherTimer _timer = new DispatcherTimer();
-        private DispatcherTimer _newBoardWaitTimer = new DispatcherTimer();
         public SlowotokWebActions WebActions { get; set; }
         public Board CurrentBoard { get; private set; }
 
@@ -41,7 +39,6 @@ namespace SłowotokCheat.WebConnection
         public GameManagement()
         {
             _timer.Interval = TimeSpan.FromMilliseconds(TICK_INTERVAL_IN_MS);
-            _newBoardWaitTimer.Interval = TimeSpan.FromMilliseconds(TICK_INTERVAL_IN_MS);
         }
 
         private async void _timer_Tick(object sender, EventArgs e)

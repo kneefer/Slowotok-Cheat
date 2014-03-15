@@ -58,7 +58,7 @@
         </Expander>
 
         <Expander x:Name="resultsExpander" IsExpanded="{Binding ShowingResults}" Grid.Row="4" Header="Found matches">
-            <ListView ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+            <ListView ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                       HorizontalAlignment="Stretch" x:Name="lstFound"  FontFamily="Consolas"
                       ItemsSource="{Binding FoundWords}" Margin="0 5 0 0">
                 <ListView.View>
@@ -70,11 +70,11 @@
                         </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn Width="{Binding RelativeSource={RelativeSource FindAncestor, 
                                     AncestorType=ListView}, Path=ActualWidth,
-                                    Converter={StaticResource DivisionConverter}, ConverterParameter=30}"
+                                    Converter={StaticResource DivisionConverter}, ConverterParameter=20}"
                                     Header="Length" DisplayMemberBinding="{Binding Length}" />
                         <GridViewColumn Width="{Binding RelativeSource={RelativeSource FindAncestor, 
                                     AncestorType=ListView}, Path=ActualWidth,
-                                    Converter={StaticResource DivisionConverter}, ConverterParameter=70}"
+                                    Converter={StaticResource DivisionConverter}, ConverterParameter=65}"
                                     Header="Word" DisplayMemberBinding="{Binding Word}" />
                     </GridView>
                 </ListView.View>

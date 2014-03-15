@@ -127,6 +127,7 @@ namespace SłowotokCheat
                 login.Click += LogoutButton_Click;
 
                 vm.IsLoggedIn = true;
+                GameOps.BoardChanged += GameOps_BoardChanged;
                 GameOps.StartAutomation();
             }
             else
@@ -135,6 +136,11 @@ namespace SłowotokCheat
             }
 
             vm.InProgress = false;
+        }
+
+        void GameOps_BoardChanged(object sender, BoardChangedEventArgs e)
+        {
+            vm.ArrayOfChars = e.NewBoard.Letters.ConvertToJaggedArray(4, 4);
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)

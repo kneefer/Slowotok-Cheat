@@ -30,6 +30,22 @@ namespace SłowotokCheat.Utilities
             }
 
             return temp2DArray;
-        } 
+        }
+
+        public static char[][] ConvertToJaggedArray(this char[] multiArray, int numOfColumns, int numOfRows)
+        {
+            char[][] jaggedArray = new char[numOfColumns][];
+
+            for (int c = 0; c < numOfColumns; c++)
+            {
+                jaggedArray[c] = new char[numOfRows];
+                for (int r = 0; r < numOfRows; r++)
+                {
+                    jaggedArray[c][r] = multiArray[c*numOfRows+r];
+                }
+            }
+
+            return jaggedArray;
+        }
     }
 }

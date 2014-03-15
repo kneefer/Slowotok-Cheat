@@ -1,5 +1,6 @@
 ﻿using SłowotokCheat.Models;
 using SłowotokCheat.Utilities;
+using SłowotokCheat.WebConnection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,7 @@ namespace SłowotokCheat
         #region Properties and Constants Area
 
         private MainPageViewModel vm = new MainPageViewModel();
+        public GameManagement GameOps { get; set; }
 
         public Dictionary<string, object> Dictionary { get; set; }
 
@@ -35,6 +37,7 @@ namespace SłowotokCheat
             loadButton.Focus();
         }
 
+        #region Generator Region
         private async Task BeginProcessing()
         {
             if (vm.InProgress) return;
@@ -43,15 +46,16 @@ namespace SłowotokCheat
             vm.InProgress = true;
             vm.FoundWords.Clear();
 
-            for (int x = 0; x < 4; x++)
+            await Task.Factory.StartNew(() =>
             {
-                for (int y = 0; y < 4; y++)
+                Parallel.For(0, 4, x =>
                 {
-                    await Task.Factory.StartNew(() => {
+                    for (int y = 0; y < 4; y++)
+                    {
                         generateWords(arrayToProcess, arrayToProcess[x, y].ToString(), x, y);
-                    });
-                }
-            }
+                    }
+                });
+            });
 
             vm.InProgress = false;
         }
@@ -70,7 +74,7 @@ namespace SłowotokCheat
                     if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null)
                     {
                         vm.FoundWords.AddSorted(
-                            new RecordModel() { Word = word, Length = word.Length },
+                            new WordRecord() { Word = word, Length = word.Length },
                             (a, b) => b.Length.CompareTo(a.Length)
                         );
                     }
@@ -105,6 +109,48 @@ namespace SłowotokCheat
             return possibilities;
         }
 
+        #endregion
+
+        #region Login/Logout Click Events
+
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            vm.InProgress = true;
+
+            GameOps = new GameManagement();
+            GameOps.WebActions = new SlowotokWebActions(vm.UserEmail, passwordBox.Password);
+            if (await GameOps.WebActions.LogOn())
+            {
+                Button login = (sender as Button);
+                login.Content = "Logout";
+                login.Click -= LoginButton_Click;
+                login.Click += LogoutButton_Click;
+
+                vm.IsLoggedIn = true;
+                GameOps.StartAutomation();
+            }
+            else
+            {
+                MessageBox.Show("Incorrect email or password!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            vm.InProgress = false;
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            GameOps.StopAutomation();
+            GameOps.Dispose();
+            GameOps = null;
+
+            vm.IsLoggedIn = false;
+            Button logout = (sender as Button);
+            logout.Content = "Login";
+            logout.Click -= LogoutButton_Click;
+            logout.Click += LoginButton_Click;
+        }
+
+        #endregion
         private async void LoadTheBase_Click(object sender, RoutedEventArgs e)
         {
             if (vm.InProgress) return;
@@ -155,25 +201,10 @@ namespace SłowotokCheat
             await BeginProcessing();
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Button login = (sender as Button);
-
-            
-
-            login.Click -= LoginButton_Click;
-            login.Click += LogoutButton_Click;
-        }
-
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button logout = (sender as Button);
-
-
-            logout.Content = "Login";
-            logout.Click -= LogoutButton_Click;
-            logout.Click += LoginButton_Click;
-            
+            Properties.Settings.Default.LastUsedEmail = vm.UserEmail;
+            Properties.Settings.Default.Save();
         }
     }
 }

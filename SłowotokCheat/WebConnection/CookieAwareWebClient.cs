@@ -9,14 +9,19 @@ namespace SłowotokCheat.WebConnection
 {
     public class CookieAwareWebClient : WebClient
     {
-        private CookieContainer cookie = new CookieContainer();
+        public CookieContainer Cookies { get; private set; }
+
+        public CookieAwareWebClient()
+        {
+            Cookies = new CookieContainer();
+        }
 
         protected override WebRequest GetWebRequest(Uri address)
         {
             WebRequest request = base.GetWebRequest(address);
             if (request is HttpWebRequest)
             {
-                (request as HttpWebRequest).CookieContainer = cookie;
+                (request as HttpWebRequest).CookieContainer = Cookies;
             }
 
             return request;

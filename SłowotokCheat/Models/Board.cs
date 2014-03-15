@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SłowotokCheat.Models
 {
-    public class BoardModel
+    public class Board
     {
         public List<string> Letters { get; set; }
         public List<string> Hashs { get; set; }

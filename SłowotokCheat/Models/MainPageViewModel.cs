@@ -11,14 +11,17 @@ namespace SłowotokCheat.Models
 {
     public class MainPageViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<RecordModel> FoundWords { get; set; }
+        public ObservableCollection<WordRecord> FoundWords { get; set; }
 
         public MainPageViewModel()
         {
             IsBaseLoaded = false;
-            FoundWords = new ObservableCollection<RecordModel>();
+            FoundWords = new ObservableCollection<WordRecord>();
             InProgress = false;
+            IsLoggedIn = false;
             ShowingResults = false;
+            UserEmail = Properties.Settings.Default.LastUsedEmail;
+
             ArrayOfChars = new char[4][]{
                 new char[4] {' ', ' ', ' ', ' '},
                 new char[4] {' ', ' ', ' ', ' '},
@@ -51,6 +54,34 @@ namespace SłowotokCheat.Models
                 {
                     _inProgress = value;
                     NotifyPropertyChanged("InProgress");
+                }
+            }
+        }
+
+        private string _userEmail;
+        public string UserEmail
+        {
+            get { return _userEmail; }
+            set
+            {
+                if (value != _userEmail)
+                {
+                    _userEmail = value;
+                    NotifyPropertyChanged("UserEmail");
+                }
+            }
+        }
+
+        private bool _isLoggedIn;
+        public bool IsLoggedIn
+        {
+            get { return _isLoggedIn; }
+            set
+            {
+                if (value != _isLoggedIn)
+                {
+                    _isLoggedIn = value;
+                    NotifyPropertyChanged("IsLoggedIn");
                 }
             }
         }

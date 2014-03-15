@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SłowotokCheat.Models
 {
-    public class RecordModel
+    public class WordRecord
     {
         public string Word { get; set; }
         public int Length { get; set; }

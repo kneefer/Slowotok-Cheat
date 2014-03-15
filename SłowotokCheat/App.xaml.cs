@@ -14,6 +14,5 @@ namespace SłowotokCheat
     /// </summary>
     public partial class App : Application
     {
-        public SlowotokWebActions WebActions { get; set; }
     }
 }

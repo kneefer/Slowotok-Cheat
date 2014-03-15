@@ -40,6 +40,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -57,16 +58,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Models\BoardModel.cs" />
+    <Compile Include="Models\Board.cs" />
+    <Compile Include="Models\GameStatus.cs" />
     <Compile Include="Models\MainPageViewModel.cs" />
     <Compile Include="Converters\DivisionConverter.cs" />
+    <Compile Include="Models\Results.cs" />
+    <Compile Include="Utilities\BoardChangedEventArgs.cs" />
     <Compile Include="Utilities\Extensions.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\InvertBooleanConverter.cs" />
-    <Compile Include="Models\RecordModel.cs" />
+    <Compile Include="Models\WordRecord.cs" />
     <Compile Include="WebConnection\CookieAwareWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WebConnection\GameManagement.cs" />
     <Compile Include="WebConnection\SlowotokWebActions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Security.Cryptography;
 
 namespace SłowotokCheat
 {
@@ -71,7 +72,9 @@ namespace SłowotokCheat
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null)
+                    if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null
+                        && GameOps != null
+                        && GameOps.CurrentBoard.Hashs.Contains(word.CalculateMD5()))
                     {
                         vm.FoundWords.AddSorted(
                             new WordRecord() { Word = word, Length = word.Length },

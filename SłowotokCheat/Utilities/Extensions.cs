@@ -49,7 +49,7 @@ namespace SłowotokCheat.Utilities
             return jaggedArray;
         }
 
-        public static string CalculateMD5(this string input)
+        public static string CalculateMD5(this string input, string format = "x2")
         {
             input = input.ToUpper();
             MD5 md5 = System.Security.Cryptography.MD5.Create();
@@ -59,7 +59,7 @@ namespace SłowotokCheat.Utilities
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < hash.Length; i++)
             {
-                sb.Append(hash[i].ToString("x2"));
+                sb.Append(hash[i].ToString(format));
             }
             return sb.ToString();
         }

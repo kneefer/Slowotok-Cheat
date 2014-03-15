@@ -36,15 +36,18 @@ namespace SłowotokCheat.WebConnection
         
         public TimeSpan TimeLeft { get; private set; }
 
+        public TimeSpan TimeToGameEnd { get; private set; }
+
         public GameManagement()
         {
             _timer.Interval = TimeSpan.FromMilliseconds(TICK_INTERVAL_IN_MS);
-            _newBoardWaitTimer.Interval = TimeSpan.FromSeconds(1);
+            _newBoardWaitTimer.Interval = TimeSpan.FromMilliseconds(TICK_INTERVAL_IN_MS);
         }
 
-        void _timer_Tick(object sender, EventArgs e)
+        private async void _timer_Tick(object sender, EventArgs e)
         {
             TimeLeft -= _timer.Interval;
+            TimeToGameEnd -= _timer.Interval;
 
             if (_intervalOfUpdatingStatus++ == 5)
             {
@@ -55,23 +58,17 @@ namespace SłowotokCheat.WebConnection
             if (TimeLeft < TimeSpan.FromSeconds(2))
             {
                 _timer.Stop();
-                _newBoardWaitTimer.Tick += (b_sender, b_e) => {
-                    if (_spanToWaitForNewBoard++ == 2)
-                    {
-                        _spanToWaitForNewBoard = 0;
-                        _newBoardWaitTimer.Stop();
-                        UpdateBoard();
-                        _timer.Start();
-                    }
-                };
-                _newBoardWaitTimer.Start();
+                await Task.Delay(2000);
+                UpdateBoard();
+                _timer.Start();
             }
         }
 
         private void UpdateBoard()
         {
             CurrentBoard = Newtonsoft.Json.JsonConvert.DeserializeObject<Board>(WebActions.Client.DownloadString("play/board"));
-            TimeLeft = TimeSpan.FromMilliseconds(CurrentBoard.Time);
+            TimeToGameEnd = TimeSpan.FromMilliseconds(CurrentBoard.Time);
+            UpdateStatus();
             OnBoardChanged();
         }
 

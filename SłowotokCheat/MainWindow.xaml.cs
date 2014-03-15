@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace SłowotokCheat
 {
@@ -35,7 +36,6 @@ namespace SłowotokCheat
             InitializeComponent();
             DataContext = vm;
             Dictionary = new Dictionary<string, object>();
-            loadButton.Focus();
         }
 
         #region Generator Region
@@ -44,6 +44,7 @@ namespace SłowotokCheat
             if (vm.InProgress) return;
 
             vm.ShowingResults = true;
+            vm.InformationBox = "Generating the words...";
             vm.InProgress = true;
             vm.FoundWords.Clear();
 
@@ -73,8 +74,7 @@ namespace SłowotokCheat
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null
-                        && GameOps != null
-                        && GameOps.CurrentBoard.Hashs.Contains(word.CalculateMD5()))
+                        && (GameOps != null ? GameOps.CurrentBoard.Hashs.Contains(word.CalculateMD5()) : true))
                     {
                         vm.FoundWords.AddSorted(
                             new WordRecord() { Word = word, Length = word.Length },
@@ -91,7 +91,6 @@ namespace SłowotokCheat
                 {
                     // the recursion
                     generateWords(_array, word + _array[nextMove.X, nextMove.Y], nextMove.X, nextMove.Y, recursLvl-1);
-
                 }
             }
         }
@@ -118,7 +117,14 @@ namespace SłowotokCheat
 
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!vm.IsBaseLoaded)
+            {
+                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             vm.InProgress = true;
+            vm.InformationBox = "Logging in...";
 
             GameOps = new GameManagement();
             GameOps.WebActions = new SlowotokWebActions(vm.UserEmail, passwordBox.Password);
@@ -131,19 +137,20 @@ namespace SłowotokCheat
 
                 vm.IsLoggedIn = true;
                 GameOps.BoardChanged += GameOps_BoardChanged;
+                vm.InProgress = false;
                 GameOps.StartAutomation();
             }
             else
             {
                 MessageBox.Show("Incorrect email or password!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-
             vm.InProgress = false;
         }
 
-        void GameOps_BoardChanged(object sender, BoardChangedEventArgs e)
+        private void GameOps_BoardChanged(object sender, BoardChangedEventArgs e)
         {
             vm.ArrayOfChars = e.NewBoard.Letters.ConvertToJaggedArray(4, 4);
+            validateRequirementsToProcessing(sender, new RoutedEventArgs());
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -160,10 +167,11 @@ namespace SłowotokCheat
         }
 
         #endregion
-        private async void LoadTheBase_Click(object sender, RoutedEventArgs e)
+        private async void LoadTheBase_Loaded(object sender, RoutedEventArgs e)
         {
             if (vm.InProgress) return;
             vm.InProgress = true;
+            vm.InformationBox = "Loading the base (it may take a while)...";
 
             try
             {
@@ -195,13 +203,13 @@ namespace SłowotokCheat
         {
             if (!vm.IsBaseLoaded)
             {
-                MessageBox.Show("Load the base first!");
+                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!vm.ValidateArray())
             {
-                MessageBox.Show("Fill all the fields first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Fill all of the fields first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

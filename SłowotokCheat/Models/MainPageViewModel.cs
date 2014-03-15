@@ -58,6 +58,20 @@ namespace SłowotokCheat.Models
             }
         }
 
+        private string _informationBox;
+        public string InformationBox
+        {
+            get { return _informationBox; }
+            set
+            {
+                if (value != _informationBox)
+                {
+                    _informationBox = value;
+                    NotifyPropertyChanged("InformationBox");
+                }
+            }
+        }
+
         private string _userEmail;
         public string UserEmail
         {

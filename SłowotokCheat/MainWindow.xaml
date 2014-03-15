@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Słowotok Cheat v1.0" SizeToContent="Height" Width="310"
-        ResizeMode="NoResize" MaxHeight="700" Closing="Window_Closing"  
-        xmlns:util="clr-namespace:SłowotokCheat.Converters"
+        ResizeMode="NoResize" MaxHeight="700" Closing="Window_Closing"
+        xmlns:util="clr-namespace:SłowotokCheat.Converters" Loaded="LoadTheBase_Loaded"
         xmlns:c="clr-namespace:GridOfTextBoxesControl;assembly=GridOfTextBoxesControl">
     <Grid Margin="15 15">
         <Grid.Resources>
@@ -21,11 +21,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Button IsEnabled="{Binding IsBaseLoaded, Converter={StaticResource InvertBooleanConverter}}"
-                Grid.Row="0" HorizontalAlignment="Stretch" Visibility="{Binding IsBaseLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter }}"
-                VerticalAlignment="Bottom" Margin="0 0 0 5" Click="LoadTheBase_Click" x:Name="loadButton">
-            <TextBlock>Load the base of words to RAM <LineBreak /> (the program needs about 170MB)</TextBlock>
-        </Button>
+        <TextBlock Visibility="{Binding InProgress, Converter={StaticResource BooleanToVisibilityConverter}}"
+                   VerticalAlignment="Bottom" TextAlignment="Center" Margin="0 0 0 5" Text="{Binding InformationBox}" />
         <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Height="5"
                      Margin="0 0 0 5" IsIndeterminate="{Binding InProgress}" />
         

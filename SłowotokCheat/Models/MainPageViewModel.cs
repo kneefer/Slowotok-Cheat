@@ -19,7 +19,6 @@ namespace SłowotokCheat.Models
             FoundWords = new ObservableCollection<WordRecord>();
             InProgress = false;
             IsLoggedIn = false;
-            ShowingResults = false;
             AreAllWordsChecked = true;
             UserEmail = Properties.Settings.Default.LastUsedEmail;
 
@@ -73,6 +72,59 @@ namespace SłowotokCheat.Models
             }
         }
 
+        private TimeSpan _timeLeft;
+        private TimeSpan _timeToGameEnd;
+        private TimeSpan _timeToGetResults;
+
+        public TimeSpan TimeLeft
+        {
+            get
+            {
+                if (_timeLeft < TimeSpan.Zero) return TimeSpan.Zero;
+                return TimeSpan.FromSeconds(_timeLeft.Minutes * 60 + _timeLeft.Seconds);
+            }
+            set
+            {
+                if (value != _timeLeft)
+                {
+                    _timeLeft = value;
+                    NotifyPropertyChanged("TimeLeft");
+                }
+            }
+        }
+        public TimeSpan TimeToGameEnd
+        {
+            get
+            {
+                if (_timeToGameEnd < TimeSpan.Zero) return TimeSpan.Zero;
+                return TimeSpan.FromSeconds(_timeToGameEnd.Minutes * 60 + _timeToGameEnd.Seconds);
+            }
+            set
+            {
+                if (value != _timeToGameEnd)
+                {
+                    _timeToGameEnd = value;
+                    NotifyPropertyChanged("TimeToGameEnd");
+                }
+            }
+        }
+        public TimeSpan TimeToGetResults
+        {
+            get
+            {
+                if (_timeToGetResults < TimeSpan.Zero) return TimeSpan.Zero;
+                return TimeSpan.FromSeconds(_timeToGetResults.Minutes * 60 + _timeToGetResults.Seconds);
+            }
+            set
+            {
+                if (value != _timeToGetResults)
+                {
+                    _timeToGetResults = value;
+                    NotifyPropertyChanged("TimeToGetResults");
+                }
+            }
+        }
+
         private string _userEmail;
         public string UserEmail
         {
@@ -97,20 +149,6 @@ namespace SłowotokCheat.Models
                 {
                     _isLoggedIn = value;
                     NotifyPropertyChanged("IsLoggedIn");
-                }
-            }
-        }
-
-        private bool _showingResults;
-        public bool ShowingResults
-        {
-            get { return _showingResults; }
-            set
-            {
-                if (value != _showingResults)
-                {
-                    _showingResults = value;
-                    NotifyPropertyChanged("ShowingResults");
                 }
             }
         }

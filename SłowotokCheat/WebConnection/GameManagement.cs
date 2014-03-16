@@ -2,6 +2,7 @@
 using SłowotokCheat.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ using System.Windows.Threading;
 
 namespace SłowotokCheat.WebConnection
 {
-    public class GameManagement : IDisposable
+    public class GameManagement : IDisposable, INotifyPropertyChanged
     {
         private const int TICK_INTERVAL_IN_MS = 1000;
 
@@ -17,6 +18,10 @@ namespace SłowotokCheat.WebConnection
         private GameStatus _status;
         private DispatcherTimer _timer = new DispatcherTimer();
         private bool _answersSent = false;
+
+        private TimeSpan _timeLeft;
+        private TimeSpan _timeToGameEnd;
+        private TimeSpan _timeToGetResults;
 
         public SlowotokWebActions WebActions { get; set; }
         public Board CurrentBoard { get; private set; }
@@ -32,9 +37,42 @@ namespace SłowotokCheat.WebConnection
                 }
             }
         }
-        public TimeSpan TimeLeft { get; private set; }
-        public TimeSpan TimeToGameEnd { get; private set; }
-        public TimeSpan TimeToGetResults { get; set; }
+        public TimeSpan TimeLeft
+        {
+            get { return _timeLeft; }
+            private set
+            {
+                if (value != _timeLeft)
+                {
+                    _timeLeft = value;
+                    NotifyPropertyChanged("TimeLeft");
+                }
+            }
+        }
+        public TimeSpan TimeToGameEnd
+        {
+            get { return _timeToGameEnd; }
+            private set
+            {
+                if (value != _timeToGameEnd)
+                {
+                    _timeToGameEnd = value;
+                    NotifyPropertyChanged("TimeToGameEnd");
+                }
+            }
+        }
+        public TimeSpan TimeToGetResults
+        {
+            get { return _timeToGetResults; }
+            private set
+            {
+                if (value != _timeToGetResults)
+                {
+                    _timeToGetResults = value;
+                    NotifyPropertyChanged("TimeToGetResults");
+                }
+            }
+        }
 
         public GameManagement()
         {
@@ -53,7 +91,7 @@ namespace SłowotokCheat.WebConnection
                 _intervalOfUpdatingStatus = 0;
             }
 
-            if (TimeToGameEnd < TimeSpan.FromSeconds(-1) && TimeLeft > TimeSpan.FromSeconds(25) && !_answersSent)
+            if (TimeToGameEnd < TimeSpan.Zero && TimeLeft > TimeSpan.FromSeconds(25) && !_answersSent)
             {
                 OnSendAnswerGotPossible();
                 _answersSent = true;
@@ -121,5 +159,21 @@ namespace SłowotokCheat.WebConnection
             if (WebActions != null) WebActions.Dispose();
             WebActions = null;
         }
+
+        #region Events Area
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
     }
 }

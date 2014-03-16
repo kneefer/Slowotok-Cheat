@@ -41,7 +41,6 @@ namespace SłowotokCheat
         {
             if (vm.InProgress) return;
 
-            vm.ShowingResults = true;
             vm.InformationBox = "Generating the words...";
             vm.InProgress = true;
             vm.FoundWords.Clear();
@@ -126,27 +125,48 @@ namespace SłowotokCheat
 
             GameOps = new GameManagement();
             GameOps.WebActions = new SlowotokWebActions(vm.UserEmail, passwordBox.Password);
+
             if (await GameOps.WebActions.LogOn())
             {
-                Button login = (sender as Button);
-                login.Click -= LoginButton_Click;
-                login.Content = "Logout";
-
                 vm.IsLoggedIn = true;
                 GameOps.BoardChanged += GameOps_BoardChanged;
                 GameOps.SendAnswerGotPossible += GameOps_SendAnswerGotPossible;
+                GameOps.PropertyChanged += GameOps_PropertyChanged;
                 vm.InProgress = false;
                 GameOps.StartAutomation();
-                LoginExpander.IsExpanded = false;
-
-                login.Click += LogoutButton_Click;
             }
             else
             {
+                vm.InProgress = false;
                 MessageBox.Show("Incorrect email or password!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
 
-            vm.InProgress = false;
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            vm.IsLoggedIn = false;
+            GameOps.StopAutomation();
+            GameOps.BoardChanged -= GameOps_BoardChanged;
+            GameOps.PropertyChanged -= GameOps_PropertyChanged;
+            GameOps.SendAnswerGotPossible -= GameOps_SendAnswerGotPossible;
+
+            GameOps.Dispose();
+            GameOps = null;
+        }
+
+        #endregion
+
+        void GameOps_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            GameManagement gm = sender as GameManagement;
+
+            switch (e.PropertyName)
+            {
+                case "TimeLeft": vm.TimeLeft = gm.TimeLeft; return;
+                case "TimeToGameEnd": vm.TimeToGameEnd = gm.TimeToGameEnd; return;
+                case "TimeToGetResults": vm.TimeToGetResults = gm.TimeToGetResults; return;
+                default: return;
+            }
         }
 
         private async void GameOps_SendAnswerGotPossible(object sender, EventArgs e)
@@ -154,9 +174,11 @@ namespace SłowotokCheat
             if (vm.InProgress) return;
 
             var response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList());
-            MessageBox.Show("You got "
-                + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length-2).Pow(2)).ToString()
-                + "/" + GameOps.CurrentBoard.Points + " points!", "Congratulation", MessageBoxButton.OK, MessageBoxImage.Information);
+            vm.InformationBox = "You got " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
+                                + "/" + GameOps.CurrentBoard.Points + " points!";
+            vm.InProgress = true;
+            await Task.Delay(2000);
+            vm.InProgress = false;
         }
 
         private void GameOps_BoardChanged(object sender, BoardEventArgs e)
@@ -165,23 +187,7 @@ namespace SłowotokCheat
             validateRequirementsToProcessing(sender, new RoutedEventArgs());
         }
 
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button logout = (sender as Button);
-            logout.Content = "Login";
-            logout.Click -= LogoutButton_Click;
 
-            GameOps.StopAutomation();
-            GameOps.BoardChanged -= GameOps_BoardChanged;
-
-            GameOps.Dispose();
-            GameOps = null;
-
-            vm.IsLoggedIn = false;
-            logout.Click += LoginButton_Click;
-        }
-
-        #endregion
         private async void LoadTheBase_Loaded(object sender, RoutedEventArgs e)
         {
             if (vm.InProgress) return;

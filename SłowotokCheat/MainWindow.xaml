@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SłowotokCheat.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Słowotok Cheat v1.0" SizeToContent="Height" Width="310"
+        Title="Słowotok Cheat v2.0" SizeToContent="Height" Width="310"
         ResizeMode="NoResize" MaxHeight="700" Closing="Window_Closing"
         xmlns:util="clr-namespace:SłowotokCheat.Converters" Loaded="LoadTheBase_Loaded"
         xmlns:c="clr-namespace:GridOfTextBoxesControl;assembly=GridOfTextBoxesControl">

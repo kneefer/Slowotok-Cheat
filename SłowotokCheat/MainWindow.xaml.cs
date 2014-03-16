@@ -25,7 +25,7 @@ namespace SłowotokCheat
         private MainPageViewModel vm = new MainPageViewModel();
         private char[,] arrayToProcess;
         public GameManagement GameOps { get; set; }
-        public Dictionary<string, object> Dictionary { get; set; }
+        public HashSet<string> Dictionary { get; set; }
 
         #endregion
 
@@ -33,7 +33,7 @@ namespace SłowotokCheat
         {
             InitializeComponent();
             DataContext = vm;
-            Dictionary = new Dictionary<string, object>();
+            Dictionary = new HashSet<string>();
         }
 
         #region Generator Region
@@ -67,7 +67,7 @@ namespace SłowotokCheat
 
             var possibilities = isMovePossible(_array, x, y);
 
-            if (word.Length >= 3 && Dictionary.ContainsKey(word))
+            if (word.Length >= 3 && Dictionary.Contains(word))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -196,7 +196,7 @@ namespace SłowotokCheat
 
                     while ((line = await file.ReadLineAsync()) != null)
                     {
-                        Dictionary.Add(line, null);
+                        Dictionary.Add(line);
                     }
                 }
 

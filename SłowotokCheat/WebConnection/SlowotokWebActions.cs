@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SłowotokCheat.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -29,27 +30,54 @@ namespace SłowotokCheat.WebConnection
 
         public async Task<bool> LogOn()
         {
-            var loginData = new NameValueCollection();
-
-            loginData.Add("Email", Email);
-            loginData.Add("Password", Password);
-
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    Client.UploadValues("account/logon", "POST", loginData);
+                    Client.UploadValues("account/logon", "POST", new NameValueCollection()
+                    {
+                        {"Email", Email},
+                        {"Password", Password}
+                    });
                 });
             }
             catch (WebException)
             {
                 MessageBox.Show("Connection error!");
+                return false;
             }
 
             if (Client.Cookies.Count > 0)
                 return true;
             else
                 return false;
+        }
+
+        public async Task<AnswersResponse> SendAnswers(List<WordRecord> foundWords)
+        {
+            var values = String.Join(",", foundWords.Select(x => x.Word.ToUpper()));
+            string responseString = null;
+            byte[] responseBytes;
+
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    responseBytes = Client.UploadValues("play/answers", "POST", new NameValueCollection()
+                    {
+                        { "word_list", values}
+                    });
+
+                    responseString = Encoding.UTF8.GetString(responseBytes);
+                });
+            }
+            catch (WebException)
+            {
+                MessageBox.Show("Error while sending answers on the server!");
+                return null;
+            }
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<AnswersResponse>(responseString);
         }
 
         public void Dispose()

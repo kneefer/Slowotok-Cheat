@@ -25,8 +25,9 @@
                    VerticalAlignment="Bottom" TextAlignment="Center" Margin="0 0 0 5" Text="{Binding InformationBox}" />
         <ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" Height="5"
                      Margin="0 0 0 5" IsIndeterminate="{Binding InProgress}" />
-        
-        <Expander Grid.Row="2" Header="Automate filling the board by logging in">
+
+        <Expander x:Name="LoginExpander" IsExpanded="True"
+                  Grid.Row="2" Header="Automate filling the board by logging in">
             <StackPanel>
                 <Grid Margin="20 0">
                     <Grid.RowDefinitions>
@@ -59,13 +60,28 @@
 
         <Expander x:Name="resultsExpander" IsExpanded="{Binding ShowingResults}" Grid.Row="4" Header="Found matches">
             <ListView ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                      HorizontalAlignment="Stretch" x:Name="lstFound"  FontFamily="Consolas"
+                      x:Name="lstFound"  FontFamily="Consolas"
                       ItemsSource="{Binding FoundWords}" Margin="0 5 0 0">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.Resources>
+                    <Style TargetType="{x:Type CheckBox}" x:Key="DataGridCheckBox">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="Margin" Value="4" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type GridViewColumn}},Path=ActualWidth}" />
+                    </Style>
+                </ListView.Resources>
                 <ListView.View>
                     <GridView>
                         <GridView.ColumnHeaderContainerStyle>
                             <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
-                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="IsManipulationEnabled" Value="False"/>
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn Width="{Binding RelativeSource={RelativeSource FindAncestor, 
@@ -74,8 +90,23 @@
                                     Header="Length" DisplayMemberBinding="{Binding Length}" />
                         <GridViewColumn Width="{Binding RelativeSource={RelativeSource FindAncestor, 
                                     AncestorType=ListView}, Path=ActualWidth,
-                                    Converter={StaticResource DivisionConverter}, ConverterParameter=65}"
+                                    Converter={StaticResource DivisionConverter}, ConverterParameter=45}"
                                     Header="Word" DisplayMemberBinding="{Binding Word}" />
+                        <GridViewColumn x:Name="checkBoxColumn" Width="{Binding RelativeSource={RelativeSource FindAncestor, 
+                                    AncestorType=ListView}, Path=ActualWidth,
+                                    Converter={StaticResource DivisionConverter}, ConverterParameter=23}">
+                            <GridViewColumn.Header>
+                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                    <CheckBox IsChecked="{Binding AreAllWordsChecked}" />
+                                    <TextBlock VerticalAlignment="Center" Text=" Send?" />
+                                </StackPanel>
+                            </GridViewColumn.Header>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox Style="{StaticResource DataGridCheckBox}" IsChecked="{Binding IsSelected}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>

@@ -63,5 +63,12 @@ namespace SłowotokCheat.Utilities
             }
             return sb.ToString();
         }
+
+        public static int Pow(this int @base, int exponent)
+        {
+            return Enumerable
+                  .Repeat(@base, exponent)
+                  .Aggregate(1, (a, b) => a * b);
+        }
     }
 }

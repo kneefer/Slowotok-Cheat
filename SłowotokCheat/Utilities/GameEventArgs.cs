@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace SłowotokCheat.Utilities
 {
-    public delegate void BoardChangedEventHandler(object sender, BoardChangedEventArgs e);
-    public class BoardChangedEventArgs : EventArgs
+    public delegate void BoardChangedEventHandler(object sender, BoardEventArgs e);
+    public delegate void SendAnswerGotPossibleEventHandler(object sender, EventArgs e);
+    public class BoardEventArgs : EventArgs
     {
-        public BoardChangedEventArgs(Board _board)
+        public BoardEventArgs(Board _board)
         {
             NewBoard = _board;
         }

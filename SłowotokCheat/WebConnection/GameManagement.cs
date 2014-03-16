@@ -12,13 +12,14 @@ namespace SłowotokCheat.WebConnection
     public class GameManagement : IDisposable
     {
         private const int TICK_INTERVAL_IN_MS = 1000;
-        private int _intervalOfUpdatingStatus = 0;
 
+        private int _intervalOfUpdatingStatus = 0;
+        private GameStatus _status;
         private DispatcherTimer _timer = new DispatcherTimer();
+        private bool _answersSent = false;
+
         public SlowotokWebActions WebActions { get; set; }
         public Board CurrentBoard { get; private set; }
-
-        private GameStatus _status;
         public GameStatus Status
         {
             get { return _status; }
@@ -31,10 +32,9 @@ namespace SłowotokCheat.WebConnection
                 }
             }
         }
-        
         public TimeSpan TimeLeft { get; private set; }
-
         public TimeSpan TimeToGameEnd { get; private set; }
+        public TimeSpan TimeToGetResults { get; set; }
 
         public GameManagement()
         {
@@ -45,11 +45,18 @@ namespace SłowotokCheat.WebConnection
         {
             TimeLeft -= _timer.Interval;
             TimeToGameEnd -= _timer.Interval;
+            TimeToGetResults -= _timer.Interval;
 
             if (_intervalOfUpdatingStatus++ == 5)
             {
                 UpdateStatus();
                 _intervalOfUpdatingStatus = 0;
+            }
+
+            if (TimeToGameEnd < TimeSpan.FromSeconds(-1) && TimeLeft > TimeSpan.FromSeconds(25) && !_answersSent)
+            {
+                OnSendAnswerGotPossible();
+                _answersSent = true;
             }
 
             if (TimeLeft < TimeSpan.FromSeconds(2))
@@ -58,7 +65,16 @@ namespace SłowotokCheat.WebConnection
                 await Task.Delay(2000);
                 UpdateBoard();
                 _timer.Start();
+                _answersSent = false;
             }
+        }
+
+        public async Task<AnswersResponse> SendAnswers(List<WordRecord> foundWords)
+        {
+            AnswersResponse response = await WebActions.SendAnswers(foundWords);
+            TimeToGetResults = TimeSpan.FromMilliseconds(response.Time);
+
+            return response;
         }
 
         private void UpdateBoard()
@@ -88,11 +104,16 @@ namespace SłowotokCheat.WebConnection
         }
 
         public event BoardChangedEventHandler BoardChanged;
-
-        public void OnBoardChanged()
+        public event SendAnswerGotPossibleEventHandler SendAnswerGotPossible;
+        private void OnBoardChanged()
         {
             if (BoardChanged != null)
-                BoardChanged(this, new BoardChangedEventArgs(CurrentBoard));
+                BoardChanged(this, new BoardEventArgs(CurrentBoard));
+        }
+        private void OnSendAnswerGotPossible()
+        {
+            if (SendAnswerGotPossible != null)
+                SendAnswerGotPossible(this, new EventArgs());
         }
         public void Dispose()
         {

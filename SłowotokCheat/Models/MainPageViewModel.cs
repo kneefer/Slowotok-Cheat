@@ -20,6 +20,7 @@ namespace SłowotokCheat.Models
             InProgress = false;
             IsLoggedIn = false;
             ShowingResults = false;
+            AreAllWordsChecked = true;
             UserEmail = Properties.Settings.Default.LastUsedEmail;
 
             ArrayOfChars = new char[4][]{
@@ -110,6 +111,26 @@ namespace SłowotokCheat.Models
                 {
                     _showingResults = value;
                     NotifyPropertyChanged("ShowingResults");
+                }
+            }
+        }
+
+        private bool _areAllWordsChecked;
+        public bool AreAllWordsChecked
+        {
+            get { return _areAllWordsChecked; }
+            set
+            {
+                if (value != _areAllWordsChecked)
+                {
+                    _areAllWordsChecked = value;
+
+                    foreach (var item in FoundWords)
+                    {
+                        item.IsSelected = value;
+                    }
+
+                    NotifyPropertyChanged("AreAllWordsChecked");
                 }
             }
         }

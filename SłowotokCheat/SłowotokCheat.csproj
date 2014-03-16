@@ -58,12 +58,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\AnswersResponse.cs" />
     <Compile Include="Models\Board.cs" />
     <Compile Include="Models\GameStatus.cs" />
     <Compile Include="Models\MainPageViewModel.cs" />
     <Compile Include="Converters\DivisionConverter.cs" />
     <Compile Include="Models\Results.cs" />
-    <Compile Include="Utilities\BoardChangedEventArgs.cs" />
+    <Compile Include="Utilities\GameEventArgs.cs" />
     <Compile Include="Utilities\Extensions.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\InvertBooleanConverter.cs" />

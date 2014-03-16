@@ -20,14 +20,12 @@ namespace SłowotokCheat
     {
         #region Properties and Constants Area
 
+        public const string DICTIONARY_FILENAME = "slowa.txt";
+
         private MainPageViewModel vm = new MainPageViewModel();
+        private char[,] arrayToProcess;
         public GameManagement GameOps { get; set; }
-
         public Dictionary<string, object> Dictionary { get; set; }
-
-        public const string FileName = "slowa.txt";
-
-        private char[,] arrayToProcess { get; set; }
 
         #endregion
 
@@ -131,23 +129,37 @@ namespace SłowotokCheat
             if (await GameOps.WebActions.LogOn())
             {
                 Button login = (sender as Button);
-                login.Content = "Logout";
                 login.Click -= LoginButton_Click;
-                login.Click += LogoutButton_Click;
+                login.Content = "Logout";
 
                 vm.IsLoggedIn = true;
                 GameOps.BoardChanged += GameOps_BoardChanged;
+                GameOps.SendAnswerGotPossible += GameOps_SendAnswerGotPossible;
                 vm.InProgress = false;
                 GameOps.StartAutomation();
+                LoginExpander.IsExpanded = false;
+
+                login.Click += LogoutButton_Click;
             }
             else
             {
                 MessageBox.Show("Incorrect email or password!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+
             vm.InProgress = false;
         }
 
-        private void GameOps_BoardChanged(object sender, BoardChangedEventArgs e)
+        private async void GameOps_SendAnswerGotPossible(object sender, EventArgs e)
+        {
+            if (vm.InProgress) return;
+
+            var response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList());
+            MessageBox.Show("You got "
+                + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length-2).Pow(2)).ToString()
+                + "/" + GameOps.CurrentBoard.Points + " points!", "Congratulation", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void GameOps_BoardChanged(object sender, BoardEventArgs e)
         {
             vm.ArrayOfChars = e.NewBoard.Letters.ConvertToJaggedArray(4, 4);
             validateRequirementsToProcessing(sender, new RoutedEventArgs());
@@ -155,14 +167,17 @@ namespace SłowotokCheat
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
+            Button logout = (sender as Button);
+            logout.Content = "Login";
+            logout.Click -= LogoutButton_Click;
+
             GameOps.StopAutomation();
+            GameOps.BoardChanged -= GameOps_BoardChanged;
+
             GameOps.Dispose();
             GameOps = null;
 
             vm.IsLoggedIn = false;
-            Button logout = (sender as Button);
-            logout.Content = "Login";
-            logout.Click -= LogoutButton_Click;
             logout.Click += LoginButton_Click;
         }
 
@@ -175,7 +190,7 @@ namespace SłowotokCheat
 
             try
             {
-                using (StreamReader file = new StreamReader("slowa.txt"))
+                using (StreamReader file = new StreamReader(DICTIONARY_FILENAME))
                 {
                     string line;
 
@@ -188,10 +203,16 @@ namespace SłowotokCheat
                 vm.IsBaseLoaded = true;
                 grid.Focus();
                 this.Width += 1;
+                passwordBox.Focus();
             }
             catch (FileNotFoundException ex)
             {
-                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory!", ex.FileName) , "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory! Place the file and restart program!", ex.FileName) ,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(String.Format("Error: {0}", ex), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

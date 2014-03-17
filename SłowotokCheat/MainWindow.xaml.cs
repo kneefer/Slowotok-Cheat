@@ -24,8 +24,10 @@ namespace SłowotokCheat
 
         private MainPageViewModel vm = new MainPageViewModel();
         private char[,] arrayToProcess;
+        private System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
         public GameManagement GameOps { get; set; }
         public HashSet<string> Dictionary { get; set; }
+        
 
         #endregion
 
@@ -34,6 +36,33 @@ namespace SłowotokCheat
             InitializeComponent();
             DataContext = vm;
             Dictionary = new HashSet<string>();
+
+            ni.Icon = new System.Drawing.Icon("favicon.ico");
+            ni.Visible = true;
+            ni.Text = "Słowotok Cheat";
+
+            ni.BalloonTipClicked += (sender, args) =>
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+            };
+
+            ni.Click += (sender, args) =>
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+            };
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Minimized)
+            {
+                this.Hide();
+                ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
+            }
+
+            base.OnStateChanged(e);
         }
 
         #region Generator Region
@@ -173,11 +202,24 @@ namespace SłowotokCheat
         {
             if (vm.InProgress) return;
 
-            var response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList());
-            vm.InformationBox = "You got " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
-                                + "/" + GameOps.CurrentBoard.Points + " points!";
             vm.InProgress = true;
-            await Task.Delay(2000);
+            vm.InformationBox = "Receiving results...";
+
+            var response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList());
+
+            var info = "You gained " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
+                                + "/" + GameOps.CurrentBoard.Points + " points!";
+
+            if (WindowState == System.Windows.WindowState.Minimized)
+            {
+                ni.ShowBalloonTip(3000, "Słowotok Cheat", info, System.Windows.Forms.ToolTipIcon.Info);
+            }
+            else
+            {
+                vm.InformationBox = info;
+                await Task.Delay(5000);
+            }
+
             vm.InProgress = false;
         }
 

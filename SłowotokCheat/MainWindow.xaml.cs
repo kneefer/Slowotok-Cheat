@@ -291,6 +291,7 @@ namespace SłowotokCheat
         {
             Properties.Settings.Default.LastUsedEmail = vm.UserEmail;
             Properties.Settings.Default.Save();
+            ni.Dispose();
         }
     }
 }

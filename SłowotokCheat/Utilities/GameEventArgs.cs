@@ -9,6 +9,8 @@ namespace SłowotokCheat.Utilities
 {
     public delegate void BoardChangedEventHandler(object sender, BoardEventArgs e);
     public delegate void SendAnswerGotPossibleEventHandler(object sender, EventArgs e);
+    public delegate void ConnectionErrorEventHandler(object sender, EventArgs e);
+
     public class BoardEventArgs : EventArgs
     {
         public BoardEventArgs(Board _board)

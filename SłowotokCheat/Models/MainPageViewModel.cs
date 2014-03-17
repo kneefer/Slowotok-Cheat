@@ -58,6 +58,20 @@ namespace SłowotokCheat.Models
             }
         }
 
+        private bool _areConnectionProblems;
+        public bool AreConnectionProblems
+        {
+            get { return _areConnectionProblems; }
+            set
+            {
+                if (value != _areConnectionProblems)
+                {
+                    _areConnectionProblems = value;
+                    NotifyPropertyChanged("AreConnectionProblems");
+                }
+            }
+        }
+
         private string _informationBox;
         public string InformationBox
         {

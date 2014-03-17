@@ -23,7 +23,7 @@ namespace SłowotokCheat.WebConnection
             {
                 (request as HttpWebRequest).CookieContainer = Cookies;
             }
-
+            request.Timeout = 1000;
             return request;
         }
     }

@@ -7,6 +7,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Newtonsoft.Json;
+using SłowotokCheat.Utilities;
 
 namespace SłowotokCheat.WebConnection
 {
@@ -43,7 +45,7 @@ namespace SłowotokCheat.WebConnection
             }
             catch (WebException)
             {
-                MessageBox.Show("Connection error!");
+                OnConnectionError();
                 return false;
             }
 
@@ -51,6 +53,25 @@ namespace SłowotokCheat.WebConnection
                 return true;
             else
                 return false;
+        }
+
+        public T ReceiveString<T>(string downloadString) where T: class
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(Client.DownloadString(downloadString));
+            }
+            catch (WebException)
+            {
+                OnConnectionError();
+                return null;
+            }
+        }
+
+        private void OnConnectionError()
+        {
+            if (ConnectionError != null)
+                ConnectionError(this, new EventArgs());
         }
 
         public async Task<AnswersResponse> SendAnswers(List<WordRecord> foundWords)
@@ -73,12 +94,14 @@ namespace SłowotokCheat.WebConnection
             }
             catch (WebException)
             {
-                MessageBox.Show("Error while sending answers on the server!");
+                OnConnectionError();
                 return null;
             }
-
+            
             return Newtonsoft.Json.JsonConvert.DeserializeObject<AnswersResponse>(responseString);
         }
+
+        public event ConnectionErrorEventHandler ConnectionError;
 
         public void Dispose()
         {

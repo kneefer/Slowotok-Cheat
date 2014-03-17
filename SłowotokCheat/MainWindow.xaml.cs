@@ -161,6 +161,7 @@ namespace SłowotokCheat
                 GameOps.BoardChanged += GameOps_BoardChanged;
                 GameOps.SendAnswerGotPossible += GameOps_SendAnswerGotPossible;
                 GameOps.PropertyChanged += GameOps_PropertyChanged;
+                GameOps.WebActions.ConnectionError += WebActions_ConnectionError;
                 vm.InProgress = false;
                 GameOps.StartAutomation();
             }
@@ -171,6 +172,13 @@ namespace SłowotokCheat
             }
         }
 
+        private async void WebActions_ConnectionError(object sender, EventArgs e)
+        {
+            vm.AreConnectionProblems = true;
+            await Task.Delay(2000);
+            vm.AreConnectionProblems = false;
+        }
+
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             vm.IsLoggedIn = false;
@@ -178,6 +186,7 @@ namespace SłowotokCheat
             GameOps.BoardChanged -= GameOps_BoardChanged;
             GameOps.PropertyChanged -= GameOps_PropertyChanged;
             GameOps.SendAnswerGotPossible -= GameOps_SendAnswerGotPossible;
+            GameOps.WebActions.ConnectionError -= WebActions_ConnectionError;
 
             GameOps.Dispose();
             GameOps = null;
@@ -205,19 +214,21 @@ namespace SłowotokCheat
             vm.InProgress = true;
             vm.InformationBox = "Receiving results...";
 
-            var response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList());
-
-            var info = "You gained " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
-                                + "/" + GameOps.CurrentBoard.Points + " points!";
-
-            if (WindowState == System.Windows.WindowState.Minimized)
+            AnswersResponse response;
+            if ((response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList())) != null)
             {
-                ni.ShowBalloonTip(3000, "Słowotok Cheat", info, System.Windows.Forms.ToolTipIcon.Info);
-            }
-            else
-            {
-                vm.InformationBox = info;
-                await Task.Delay(5000);
+                var info = "You gained " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
+                                    + "/" + GameOps.CurrentBoard.Points + " points!";
+
+                if (WindowState == System.Windows.WindowState.Minimized)
+                {
+                    ni.ShowBalloonTip(3000, "Słowotok Cheat", info, System.Windows.Forms.ToolTipIcon.Info);
+                }
+                else
+                {
+                    vm.InformationBox = info;
+                    await Task.Delay(5000);
+                }
             }
 
             vm.InProgress = false;

@@ -17,7 +17,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        
+
         <Grid Grid.Column="0" Margin="0 0 5 0" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -25,7 +25,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            
+
             <TextBlock Visibility="{Binding InProgress, Converter={StaticResource BooleanToVisibilityConverter}}"
                    VerticalAlignment="Bottom" TextAlignment="Center" Margin="0 0 0 5" Text="{Binding InformationBox}" />
             <TextBlock Visibility="{Binding InProgress, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -91,11 +91,14 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <TextBlock Text="Connection Problems!" Foreground="Red" FontWeight="Bold" TextAlignment="Center" Grid.Row="0"
+                       Visibility="{Binding AreConnectionProblems, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <Expander Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
-                      Grid.Row="0" Header="Timers" IsExpanded="True">
+                      Grid.Row="1" Header="Timers" IsExpanded="True">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -114,9 +117,9 @@
                     <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center" Grid.Row="1" Grid.Column="2" Text="{Binding TimeToGetResults}" />
                 </Grid>
             </Expander>
-            
+
             <Expander x:Name="LoginExpander" IsExpanded="True" Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                  Grid.Row="1" Header="Automate filling the board by logging in">
+                  Grid.Row="2" Header="Automate filling the board by logging in">
                 <StackPanel>
                     <Grid Margin="20 0">
                         <Grid.RowDefinitions>
@@ -138,7 +141,7 @@
                 </StackPanel>
             </Expander>
 
-            <Expander IsExpanded="True" Grid.Row="2" Header="Game board">
+            <Expander IsExpanded="True" Grid.Row="3" Header="Game board">
                 <StackPanel>
                     <c:GridOfTextBoxesControl Margin="0 5 0 0" IsEnabled="{Binding IsLoggedIn, Converter={StaticResource InvertBooleanConverter}}"
                                               x:Name="grid" ArrayOfChars="{Binding ArrayOfChars}"
@@ -148,7 +151,7 @@
                     HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="validateRequirementsToProcessing" />
                 </StackPanel>
             </Expander>
-            <TextBlock Grid.Row="3" HorizontalAlignment="Stretch" TextAlignment="Center" Margin="0 10"
+            <TextBlock Grid.Row="4" HorizontalAlignment="Stretch" Margin="0 10" TextAlignment="Center" 
                        Text="Created by Szymon Bartnik - szbartnik@gmail.com" VerticalAlignment="Center" />
         </Grid>
     </Grid>

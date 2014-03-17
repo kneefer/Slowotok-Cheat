@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Net;
 
 namespace SłowotokCheat.WebConnection
 {
@@ -15,6 +16,7 @@ namespace SłowotokCheat.WebConnection
         private const int TICK_INTERVAL_IN_MS = 1000;
 
         private int _intervalOfUpdatingStatus = 0;
+        private int _intervalOfUpdatingGameTime = 0;
         private GameStatus _status;
         private DispatcherTimer _timer = new DispatcherTimer();
         private bool _answersSent = false;
@@ -91,6 +93,12 @@ namespace SłowotokCheat.WebConnection
                 _intervalOfUpdatingStatus = 0;
             }
 
+            if(_intervalOfUpdatingGameTime++ == 10)
+            {
+                UpdateGameTime();
+                _intervalOfUpdatingGameTime = 0;
+            }
+
             if (TimeToGameEnd < TimeSpan.Zero && TimeLeft > TimeSpan.FromSeconds(25) && !_answersSent)
             {
                 OnSendAnswerGotPossible();
@@ -107,17 +115,28 @@ namespace SłowotokCheat.WebConnection
             }
         }
 
+        private void UpdateGameTime()
+        {
+            
+        }
+
         public async Task<AnswersResponse> SendAnswers(List<WordRecord> foundWords)
         {
-            AnswersResponse response = await WebActions.SendAnswers(foundWords);
-            TimeToGetResults = TimeSpan.FromMilliseconds(response.Time);
+            AnswersResponse response;
 
+            if ((response = await WebActions.SendAnswers(foundWords)) == null)
+                return null;
+
+            TimeToGetResults = TimeSpan.FromMilliseconds(response.Time);
             return response;
         }
 
         private void UpdateBoard()
         {
-            CurrentBoard = Newtonsoft.Json.JsonConvert.DeserializeObject<Board>(WebActions.Client.DownloadString("play/board"));
+            Board response;
+            if((response = WebActions.ReceiveString<Board>("play/board")) == null)
+                return;
+            CurrentBoard = response;
             TimeToGameEnd = TimeSpan.FromMilliseconds(CurrentBoard.Time);
             UpdateStatus();
             OnBoardChanged();
@@ -125,7 +144,10 @@ namespace SłowotokCheat.WebConnection
 
         private void UpdateStatus()
         {
-            Status = Newtonsoft.Json.JsonConvert.DeserializeObject<GameStatus>(WebActions.Client.DownloadString("play/status"));
+            GameStatus response;
+            if ((response = WebActions.ReceiveString<GameStatus>("play/status")) == null)
+                return;
+             Status = response;
         }
 
         public void StartAutomation()
@@ -143,6 +165,7 @@ namespace SłowotokCheat.WebConnection
 
         public event BoardChangedEventHandler BoardChanged;
         public event SendAnswerGotPossibleEventHandler SendAnswerGotPossible;
+        
         private void OnBoardChanged()
         {
             if (BoardChanged != null)

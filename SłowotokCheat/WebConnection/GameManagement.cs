@@ -131,10 +131,10 @@ namespace SłowotokCheat.WebConnection
             return response;
         }
 
-        private void UpdateBoard()
+        private async void UpdateBoard()
         {
             Board response;
-            if((response = WebActions.ReceiveString<Board>("play/board")) == null)
+            if ((response = await WebActions.ReceiveStringAsync<Board>("play/board")) == null)
                 return;
             CurrentBoard = response;
             TimeToGameEnd = TimeSpan.FromMilliseconds(CurrentBoard.Time);
@@ -142,10 +142,10 @@ namespace SłowotokCheat.WebConnection
             OnBoardChanged();
         }
 
-        private void UpdateStatus()
+        private async void UpdateStatus()
         {
             GameStatus response;
-            if ((response = WebActions.ReceiveString<GameStatus>("play/status")) == null)
+            if ((response = await WebActions.ReceiveStringAsync<GameStatus>("play/status")) == null)
                 return;
              Status = response;
         }

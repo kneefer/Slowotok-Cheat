@@ -54,17 +54,6 @@ namespace SłowotokCheat
             };
         }
 
-        protected override void OnStateChanged(EventArgs e)
-        {
-            if (WindowState == System.Windows.WindowState.Minimized)
-            {
-                this.Hide();
-                ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
-            }
-
-            base.OnStateChanged(e);
-        }
-
         #region Generator Region
         private async Task BeginProcessing()
         {
@@ -172,13 +161,6 @@ namespace SłowotokCheat
             }
         }
 
-        private async void WebActions_ConnectionError(object sender, EventArgs e)
-        {
-            vm.AreConnectionProblems = true;
-            await Task.Delay(2000);
-            vm.AreConnectionProblems = false;
-        }
-
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             vm.IsLoggedIn = false;
@@ -193,6 +175,24 @@ namespace SłowotokCheat
         }
 
         #endregion
+
+        private async void WebActions_ConnectionError(object sender, EventArgs e)
+        {
+            vm.AreConnectionProblems = true;
+            await Task.Delay(5000);
+            vm.AreConnectionProblems = false;
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Minimized)
+            {
+                this.Hide();
+                ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
+            }
+
+            base.OnStateChanged(e);
+        }
 
         void GameOps_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -239,7 +239,6 @@ namespace SłowotokCheat
             vm.ArrayOfChars = e.NewBoard.Letters.ConvertToJaggedArray(4, 4);
             validateRequirementsToProcessing(sender, new RoutedEventArgs());
         }
-
 
         private async void LoadTheBase_Loaded(object sender, RoutedEventArgs e)
         {

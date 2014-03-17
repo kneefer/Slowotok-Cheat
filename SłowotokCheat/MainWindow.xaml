@@ -95,8 +95,12 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Connection Problems!" Foreground="Red" FontWeight="Bold" TextAlignment="Center" Grid.Row="0"
-                       Visibility="{Binding AreConnectionProblems, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="Connection established" Foreground="Green" FontWeight="Bold" TextAlignment="Center" Grid.Row="0"
+                           Visibility="{Binding AreConnectionProblems, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                <TextBlock Text="Connection problems... trying to reconnect" Foreground="Red" FontWeight="Bold" TextAlignment="Center" Grid.Row="1"
+                           Visibility="{Binding AreConnectionProblems, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </StackPanel>
             <Expander Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                       Grid.Row="1" Header="Timers" IsExpanded="True">
                 <Grid>

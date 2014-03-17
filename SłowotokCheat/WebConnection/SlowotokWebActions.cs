@@ -55,11 +55,14 @@ namespace SłowotokCheat.WebConnection
                 return false;
         }
 
-        public T ReceiveString<T>(string downloadString) where T: class
+        public async Task<T> ReceiveStringAsync<T>(string downloadString) where T: class
         {
             try
             {
-                return JsonConvert.DeserializeObject<T>(Client.DownloadString(downloadString));
+                return await Task.Factory.StartNew(() =>
+                {
+                    return JsonConvert.DeserializeObject<T>(Client.DownloadString(downloadString));
+                });
             }
             catch (WebException)
             {

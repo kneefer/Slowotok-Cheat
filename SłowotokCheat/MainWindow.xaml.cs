@@ -250,7 +250,6 @@ namespace SłowotokCheat
 
                 vm.IsBaseLoaded = true;
                 grid.Focus();
-                this.Width += 1;
                 passwordBox.Focus();
             }
             catch (FileNotFoundException ex)
@@ -289,6 +288,7 @@ namespace SłowotokCheat
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            
             Properties.Settings.Default.LastUsedEmail = vm.UserEmail;
             Properties.Settings.Default.Save();
             ni.Dispose();

@@ -37,12 +37,10 @@ namespace GridOfTextBoxesControl
             remove { RemoveHandler(EnterPressedEvent, value); }
         }
 
-        public GridOfTextBoxesControl()
+        static GridOfTextBoxesControl()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(GridOfTextBoxesControl), new FrameworkPropertyMetadata(typeof(GridOfTextBoxesControl)));
         }
-
-        static GridOfTextBoxesControl() { }
 
         public override void OnApplyTemplate()
         {

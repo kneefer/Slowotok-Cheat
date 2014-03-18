@@ -87,13 +87,13 @@ namespace SłowotokCheat.WebConnection
             TimeToGameEnd -= _timer.Interval;
             TimeToGetResults -= _timer.Interval;
 
-            if (_intervalOfUpdatingStatus++ == 5)
+            if (_intervalOfUpdatingStatus++ == 10)
             {
                 UpdateStatus();
                 _intervalOfUpdatingStatus = 0;
             }
 
-            if(_intervalOfUpdatingGameTime++ == 10)
+            if(_intervalOfUpdatingGameTime++ == 20)
             {
                 UpdateGameTime();
                 _intervalOfUpdatingGameTime = 0;
@@ -115,9 +115,12 @@ namespace SłowotokCheat.WebConnection
             }
         }
 
-        private void UpdateGameTime()
+        private async void UpdateGameTime()
         {
-            
+            Board response;
+            if ((response = await WebActions.ReceiveStringAsync<Board>("play/board")) == null)
+                return;
+            TimeToGameEnd = TimeSpan.FromMilliseconds(response.Time);
         }
 
         public async Task<AnswersResponse> SendAnswers(List<WordRecord> foundWords)

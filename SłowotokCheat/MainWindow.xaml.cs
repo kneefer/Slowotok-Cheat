@@ -179,7 +179,7 @@ namespace SłowotokCheat
         private async void WebActions_ConnectionError(object sender, EventArgs e)
         {
             vm.AreConnectionProblems = true;
-            await Task.Delay(5000);
+            await Task.Delay(10000);
             vm.AreConnectionProblems = false;
         }
 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json;
 using SłowotokCheat.Utilities;
+using System.Threading;
 
 namespace SłowotokCheat.WebConnection
 {
@@ -18,6 +19,7 @@ namespace SłowotokCheat.WebConnection
 
         public readonly string Email;
         private readonly string Password;
+        private bool _isBusy = false;
 
         public SlowotokWebActions(string _email, string _password)
         {
@@ -36,11 +38,13 @@ namespace SłowotokCheat.WebConnection
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
                     Client.UploadValues("account/logon", "POST", new NameValueCollection()
                     {
                         {"Email", Email},
                         {"Password", Password}
                     });
+                    _isBusy = false;
                 });
             }
             catch (WebException)
@@ -61,7 +65,12 @@ namespace SłowotokCheat.WebConnection
             {
                 return await Task.Factory.StartNew(() =>
                 {
-                    return JsonConvert.DeserializeObject<T>(Client.DownloadString(downloadString));
+                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
+                    var response = Client.DownloadString(downloadString);
+                    _isBusy = false;
+
+                    return JsonConvert.DeserializeObject<T>(response);
+                    
                 });
             }
             catch (WebException)
@@ -87,10 +96,12 @@ namespace SłowotokCheat.WebConnection
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
                     responseBytes = Client.UploadValues("play/answers", "POST", new NameValueCollection()
                     {
                         { "word_list", values}
                     });
+                    _isBusy = false;
 
                     responseString = Encoding.UTF8.GetString(responseBytes);
                 });

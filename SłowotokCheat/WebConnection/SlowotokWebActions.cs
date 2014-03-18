@@ -19,7 +19,7 @@ namespace SłowotokCheat.WebConnection
 
         public readonly string Email;
         private readonly string Password;
-        private bool _isBusy = false;
+        private object lck = new object();
 
         public SlowotokWebActions(string _email, string _password)
         {
@@ -38,13 +38,14 @@ namespace SłowotokCheat.WebConnection
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
-                    Client.UploadValues("account/logon", "POST", new NameValueCollection()
+                    lock (lck)
                     {
-                        {"Email", Email},
-                        {"Password", Password}
-                    });
-                    _isBusy = false;
+                        Client.UploadValues("account/logon", "POST", new NameValueCollection()
+                        {
+                            {"Email", Email},
+                            {"Password", Password}
+                        });
+                    }
                 });
             }
             catch (WebException)
@@ -65,12 +66,12 @@ namespace SłowotokCheat.WebConnection
             {
                 return await Task.Factory.StartNew(() =>
                 {
-                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
-                    var response = Client.DownloadString(downloadString);
-                    _isBusy = false;
-
+                    string response;
+                    lock (lck)
+                    {
+                        response = Client.DownloadString(downloadString);
+                    }
                     return JsonConvert.DeserializeObject<T>(response);
-                    
                 });
             }
             catch (WebException)
@@ -96,12 +97,13 @@ namespace SłowotokCheat.WebConnection
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    while (_isBusy) { Thread.Sleep(100); } _isBusy = true;
-                    responseBytes = Client.UploadValues("play/answers", "POST", new NameValueCollection()
+                    lock (lck)
                     {
-                        { "word_list", values}
-                    });
-                    _isBusy = false;
+                        responseBytes = Client.UploadValues("play/answers", "POST", new NameValueCollection()
+                        {
+                            { "word_list", values}
+                        });
+                    }
 
                     responseString = Encoding.UTF8.GetString(responseBytes);
                 });

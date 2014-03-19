@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace SłowotokCheat.Utilities
 {
@@ -69,6 +71,22 @@ namespace SłowotokCheat.Utilities
             return Enumerable
                   .Repeat(@base, exponent)
                   .Aggregate(1, (a, b) => a * b);
+        }
+    }
+
+    public static class DispatchService
+    {
+        public static void Invoke(Action action)
+        {
+            Dispatcher dispatchObject = Application.Current.Dispatcher;
+            if (dispatchObject == null || dispatchObject.CheckAccess())
+            {
+                action();
+            }
+            else
+            {
+                dispatchObject.Invoke(action);
+            }
         }
     }
 }

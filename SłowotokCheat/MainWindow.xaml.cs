@@ -1,35 +1,15 @@
-﻿using SłowotokCheat.Models;
-using SłowotokCheat.Utilities;
-using SłowotokCheat.WebConnection;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Security.Cryptography;
-using System.Threading;
+﻿using GalaSoft.MvvmLight.Messaging;
 using SłowotokCheat.ViewModel;
-using GalaSoft.MvvmLight.Messaging;
+using System;
+using System.IO;
+using System.Windows;
 
 namespace SłowotokCheat
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        #region Properties and Constants Area
-
-        public const string DICTIONARY_FILENAME = "slowa.txt";
-        private System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-        public GameManagement GameOps { get; set; }
-        public HashSet<string> Dictionary { get; set; }
+        private System.Windows.Forms.NotifyIcon _ni = new System.Windows.Forms.NotifyIcon();
         
-
-        #endregion
-
         public MainWindow()
         {
             InitializeComponent();
@@ -43,7 +23,7 @@ namespace SłowotokCheat
             {
                 if (WindowState == System.Windows.WindowState.Minimized)
                 {
-                    ni.ShowBalloonTip(3000, "Słowotok Cheat", msg, System.Windows.Forms.ToolTipIcon.Info);
+                    _ni.ShowBalloonTip(3000, "Słowotok Cheat", msg, System.Windows.Forms.ToolTipIcon.Info);
                 }
                 else
                 {
@@ -54,21 +34,24 @@ namespace SłowotokCheat
 
         private void ConfigureBaloonNotifications()
         {
-            ni.Icon = new System.Drawing.Icon("favicon.ico");
-            ni.Visible = true;
-            ni.Text = "Słowotok Cheat";
-
-            ni.BalloonTipClicked += (sender, args) =>
+            using (var stream = Application.GetResourceStream(new Uri(
+                "pack://application:,,,/SłowotokCheat;component/Resources/favicon.ico"
+            )).Stream)
             {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            };
+                _ni.Icon = new System.Drawing.Icon(stream);
+            }
 
-            ni.Click += (sender, args) =>
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            };
+            _ni.Visible = true;
+            _ni.Text = "Słowotok Cheat";
+
+            _ni.BalloonTipClicked += ShowBaloonTip;
+            _ni.Click += ShowBaloonTip;
+        }
+
+        private void ShowBaloonTip(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = WindowState.Normal;
         }
 
         protected override void OnStateChanged(EventArgs e)
@@ -76,7 +59,7 @@ namespace SłowotokCheat
             if (WindowState == System.Windows.WindowState.Minimized)
             {
                 this.Hide();
-                ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
+                _ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
             }
 
             base.OnStateChanged(e);
@@ -84,15 +67,6 @@ namespace SłowotokCheat
 
         //
         // Events which was hard to implement as RelayCommand (leaved for the clarity)
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Properties.Settings.Default.LastUsedEmail = emailBox.Text;
-            Properties.Settings.Default.Save();
-            ni.Dispose();
-        }
-
-
 
         private void FindWords_EnterPressed(object sender, RoutedEventArgs e)
         {
@@ -110,6 +84,15 @@ namespace SłowotokCheat
             {
                 await vm.LoadTheBase();
             }
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            Properties.Settings.Default.LastUsedEmail = emailBox.Text;
+            Properties.Settings.Default.Save();
+            _ni.Dispose();
         }
     }
 }

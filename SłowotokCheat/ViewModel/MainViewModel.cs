@@ -25,7 +25,6 @@ namespace SłowotokCheat.ViewModel
         public MainViewModel()
         {
             InitializeCommands();
-
             RegisterBaloonMessagesFromMainWindow();
 
             // Initialized every property to clear view on
@@ -52,19 +51,25 @@ namespace SłowotokCheat.ViewModel
             UserEmail = Properties.Settings.Default.LastUsedEmail;
             IsLoggedIn = false;
 
+            // Contains Polish dictionary
             Dictionary = new HashSet<string>();
         }
 
         private void RegisterBaloonMessagesFromMainWindow()
         {
-            Messenger.Default.Register<string>(this, "toVM" , NotifyUser);
+            Messenger.Default.Register<string>(this, "toVM" , NotifyUserByWindow);
         }
 
-        private async void NotifyUser(string msg)
+        private async void NotifyUserByWindow(string msg)
         {
             InformationBox = msg;
             await Task.Delay(5000);
             InProgress = false;
+        }
+
+        private void NotifyGlobally(string message)
+        {
+            Messenger.Default.Send<string>(message, "toWindow"); // send to the MainWindow
         }
 
         #region Generator Region
@@ -205,7 +210,7 @@ namespace SłowotokCheat.ViewModel
                 var info = "You gained " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
                                     + "/" + GameOps.CurrentBoard.Points + " points!";
 
-                Messenger.Default.Send<string>(info, "toWindow"); // send to the MainWindow
+                NotifyGlobally(info);
             }
         }
 

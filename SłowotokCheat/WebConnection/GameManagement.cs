@@ -13,7 +13,9 @@ namespace SłowotokCheat.WebConnection
 {
     public class GameManagement : IDisposable, INotifyPropertyChanged
     {
-        private const int TICK_INTERVAL_IN_MS = 1000;
+        private const int TICK_INTERVAL_IN_SEC = 1;
+        private const int INTERVAL_UPDATING_TIMELEFT_IN_SEC = 10;
+        private const int INTERVAL_UPDATING_GAME_END_IN_SEC = 20;
 
         private int _intervalOfUpdatingStatus = 0;
         private int _intervalOfUpdatingGameTime = 0;
@@ -78,7 +80,7 @@ namespace SłowotokCheat.WebConnection
 
         public GameManagement()
         {
-            _timer.Interval = TimeSpan.FromMilliseconds(TICK_INTERVAL_IN_MS);
+            _timer.Interval = TimeSpan.FromSeconds(TICK_INTERVAL_IN_SEC);
         }
 
         private async void _timer_Tick(object sender, EventArgs e)
@@ -87,13 +89,13 @@ namespace SłowotokCheat.WebConnection
             TimeToGameEnd -= _timer.Interval;
             TimeToGetResults -= _timer.Interval;
 
-            if (_intervalOfUpdatingStatus++ == 10)
+            if (_intervalOfUpdatingStatus++ == INTERVAL_UPDATING_TIMELEFT_IN_SEC)
             {
                 UpdateStatus();
                 _intervalOfUpdatingStatus = 0;
             }
 
-            if(_intervalOfUpdatingGameTime++ == 20)
+            if(_intervalOfUpdatingGameTime++ == INTERVAL_UPDATING_GAME_END_IN_SEC)
             {
                 UpdateGameTime();
                 _intervalOfUpdatingGameTime = 0;
@@ -120,6 +122,7 @@ namespace SłowotokCheat.WebConnection
             Board response;
             if ((response = await WebActions.ReceiveStringAsync<Board>("play/board")) == null)
                 return;
+
             TimeToGameEnd = TimeSpan.FromMilliseconds(response.Time);
         }
 
@@ -139,6 +142,7 @@ namespace SłowotokCheat.WebConnection
             Board response;
             if ((response = await WebActions.ReceiveStringAsync<Board>("play/board")) == null)
                 return;
+
             CurrentBoard = response;
             TimeToGameEnd = TimeSpan.FromMilliseconds(CurrentBoard.Time);
             UpdateStatus();
@@ -150,6 +154,7 @@ namespace SłowotokCheat.WebConnection
             GameStatus response;
             if ((response = await WebActions.ReceiveStringAsync<GameStatus>("play/status")) == null)
                 return;
+
              Status = response;
         }
 
@@ -165,20 +170,7 @@ namespace SłowotokCheat.WebConnection
             _timer.Stop();
             _timer.Tick -= _timer_Tick;
         }
-
-        public event BoardChangedEventHandler BoardChanged;
-        public event SendAnswerGotPossibleEventHandler SendAnswerGotPossible;
         
-        private void OnBoardChanged()
-        {
-            if (BoardChanged != null)
-                BoardChanged(this, new BoardEventArgs(CurrentBoard));
-        }
-        private void OnSendAnswerGotPossible()
-        {
-            if (SendAnswerGotPossible != null)
-                SendAnswerGotPossible(this, new EventArgs());
-        }
         public void Dispose()
         {
             StopAutomation();
@@ -189,6 +181,19 @@ namespace SłowotokCheat.WebConnection
         #region Events Area
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event BoardChangedEventHandler BoardChanged;
+        public event SendAnswerGotPossibleEventHandler SendAnswerGotPossible;
+
+        private void OnBoardChanged()
+        {
+            if (BoardChanged != null)
+                BoardChanged(this, new BoardEventArgs(CurrentBoard));
+        }
+        private void OnSendAnswerGotPossible()
+        {
+            if (SendAnswerGotPossible != null)
+                SendAnswerGotPossible(this, new EventArgs());
+        }
 
         private void NotifyPropertyChanged(string propertyName)
         {

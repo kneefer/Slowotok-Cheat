@@ -1,186 +1,57 @@
-﻿using SłowotokCheat.Models;
-using SłowotokCheat.Utilities;
-using SłowotokCheat.WebConnection;
+﻿using GalaSoft.MvvmLight.Messaging;
+using SłowotokCheat.ViewModel;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Security.Cryptography;
-using System.Threading;
 
 namespace SłowotokCheat
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        #region Properties and Constants Area
-
-        public const string DICTIONARY_FILENAME = "slowa.txt";
-
-        private MainPageViewModel vm = new MainPageViewModel();
-        private char[,] arrayToProcess;
-        private System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-        public GameManagement GameOps { get; set; }
-        public HashSet<string> Dictionary { get; set; }
+        private System.Windows.Forms.NotifyIcon _ni = new System.Windows.Forms.NotifyIcon();
         
-
-        #endregion
-
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = vm;
-            Dictionary = new HashSet<string>();
-
-            ni.Icon = new System.Drawing.Icon("favicon.ico");
-            ni.Visible = true;
-            ni.Text = "Słowotok Cheat";
-
-            ni.BalloonTipClicked += (sender, args) =>
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            };
-
-            ni.Click += (sender, args) =>
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-            };
+            ConfigureBaloonNotifications();
+            RegisterBaloonMessagesFromViewModel();
         }
 
-        #region Generator Region
-        private async Task BeginProcessing()
+        private void RegisterBaloonMessagesFromViewModel()
         {
-            if (vm.InProgress) return;
-
-            vm.InformationBox = "Generating the words...";
-            vm.InProgress = true;
-            vm.FoundWords.Clear();
-
-            await Task.Factory.StartNew(() =>
+            Messenger.Default.Register<string>(this, "toWindow" , msg =>
             {
-                Parallel.For(0, 4, x =>
+                if (WindowState == System.Windows.WindowState.Minimized)
                 {
-                    for (int y = 0; y < 4; y++)
-                    {
-                        generateWords(arrayToProcess, arrayToProcess[x, y].ToString(), x, y);
-                    }
-                });
+                    _ni.ShowBalloonTip(3000, "Słowotok Cheat", msg, System.Windows.Forms.ToolTipIcon.Info);
+                }
+                else
+                {
+                    Messenger.Default.Send<string>(msg, "toVM"); // send to the MainViewModel
+                }
             });
-
-            vm.InProgress = false;
         }
 
-        private void generateWords(char[,] array, string word, int x, int y, int recursLvl = 16)
+        private void ConfigureBaloonNotifications()
         {
-            char[,] _array = ((char[,])array.Clone()); // cloning the array
-            _array[x, y] = '_';
-
-            var possibilities = isMovePossible(_array, x, y);
-
-            if (word.Length >= 3 && Dictionary.Contains(word))
+            using (var stream = Application.GetResourceStream(new Uri(
+                "pack://application:,,,/SłowotokCheat;component/Resources/favicon.ico"
+            )).Stream)
             {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    if (vm.FoundWords.FirstOrDefault(z => z.Word.Equals(word)) == null
-                        && (GameOps != null ? GameOps.CurrentBoard.Hashs.Contains(word.CalculateMD5()) : true))
-                    {
-                        vm.FoundWords.AddSorted(
-                            new WordRecord() { Word = word, Length = word.Length },
-                            (a, b) => b.Length.CompareTo(a.Length)
-                        );
-                    }
-                }));
+                _ni.Icon = new System.Drawing.Icon(stream);
             }
 
+            _ni.Visible = true;
+            _ni.Text = "Słowotok Cheat";
 
-            if (possibilities.Count != 0 && recursLvl != 1)
-            {
-                foreach (var nextMove in possibilities)
-                {
-                    // the recursion
-                    generateWords(_array, word + _array[nextMove.X, nextMove.Y], nextMove.X, nextMove.Y, recursLvl-1);
-                }
-            }
+            _ni.BalloonTipClicked += ShowBaloonTip;
+            _ni.Click += ShowBaloonTip;
         }
 
-        private List<IntPoint> isMovePossible(char[,] array, int x, int y)
+        private void ShowBaloonTip(object sender, EventArgs e)
         {
-            var possibilities = new List<IntPoint>();
-
-            for (int a = (x - 1); a <= (x + 1); a++)
-            {
-                for (int b = (y - 1); b <= (y + 1); b++)
-                {
-                    if (a >= 0 && a < 4 && b >= 0 && b < 4 && array[a,b] != '_')
-                        possibilities.Add(new IntPoint(a, b));
-                }
-            }
-            
-            return possibilities;
-        }
-
-        #endregion
-
-        #region Login/Logout Click Events
-
-        private async void LoginButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!vm.IsBaseLoaded)
-            {
-                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            vm.InProgress = true;
-            vm.InformationBox = "Logging in...";
-
-            GameOps = new GameManagement();
-            GameOps.WebActions = new SlowotokWebActions(vm.UserEmail, passwordBox.Password);
-
-            if (await GameOps.WebActions.LogOn())
-            {
-                vm.IsLoggedIn = true;
-                GameOps.BoardChanged += GameOps_BoardChanged;
-                GameOps.SendAnswerGotPossible += GameOps_SendAnswerGotPossible;
-                GameOps.PropertyChanged += GameOps_PropertyChanged;
-                GameOps.WebActions.ConnectionError += WebActions_ConnectionError;
-                vm.InProgress = false;
-                GameOps.StartAutomation();
-            }
-            else
-            {
-                vm.InProgress = false;
-                MessageBox.Show("Incorrect email or password!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
-        {
-            vm.IsLoggedIn = false;
-            GameOps.StopAutomation();
-            GameOps.BoardChanged -= GameOps_BoardChanged;
-            GameOps.PropertyChanged -= GameOps_PropertyChanged;
-            GameOps.SendAnswerGotPossible -= GameOps_SendAnswerGotPossible;
-            GameOps.WebActions.ConnectionError -= WebActions_ConnectionError;
-
-            GameOps.Dispose();
-            GameOps = null;
-        }
-
-        #endregion
-
-        private async void WebActions_ConnectionError(object sender, EventArgs e)
-        {
-            vm.AreConnectionProblems = true;
-            await Task.Delay(10000);
-            vm.AreConnectionProblems = false;
+            this.Show();
+            this.WindowState = WindowState.Normal;
         }
 
         protected override void OnStateChanged(EventArgs e)
@@ -188,120 +59,40 @@ namespace SłowotokCheat
             if (WindowState == System.Windows.WindowState.Minimized)
             {
                 this.Hide();
-                ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
+                _ni.ShowBalloonTip(3000, "Słowotok Cheat", "The program is hidden in tray but is still working!", System.Windows.Forms.ToolTipIcon.Info);
             }
 
             base.OnStateChanged(e);
         }
 
-        void GameOps_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            GameManagement gm = sender as GameManagement;
+        //
+        // Events which was hard to implement as RelayCommand (leaved for the clarity)
 
-            switch (e.PropertyName)
+        private void FindWords_EnterPressed(object sender, RoutedEventArgs e)
+        {
+            var vm = DataContext as MainViewModel;
+            if (vm != null)
             {
-                case "TimeLeft": vm.TimeLeft = gm.TimeLeft; return;
-                case "TimeToGameEnd": vm.TimeToGameEnd = gm.TimeToGameEnd; return;
-                case "TimeToGetResults": vm.TimeToGetResults = gm.TimeToGetResults; return;
-                default: return;
+                vm.FindWords();
             }
         }
 
-        private async void GameOps_SendAnswerGotPossible(object sender, EventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (vm.InProgress) return;
-
-            vm.InProgress = true;
-            vm.InformationBox = "Receiving results...";
-
-            AnswersResponse response;
-            if ((response = await GameOps.SendAnswers(vm.FoundWords.ToList().Where(x => x.IsSelected).ToList())) != null)
+            var vm = DataContext as MainViewModel;
+            if (vm != null)
             {
-                var info = "You gained " + response.Answers.Where(x => x.Found).Sum(y => (y.Word.Length - 2).Pow(2)).ToString()
-                                    + "/" + GameOps.CurrentBoard.Points + " points!";
-
-                if (WindowState == System.Windows.WindowState.Minimized)
-                {
-                    ni.ShowBalloonTip(3000, "Słowotok Cheat", info, System.Windows.Forms.ToolTipIcon.Info);
-                }
-                else
-                {
-                    vm.InformationBox = info;
-                    await Task.Delay(5000);
-                }
-            }
-
-            vm.InProgress = false;
-        }
-
-        private void GameOps_BoardChanged(object sender, BoardEventArgs e)
-        {
-            vm.ArrayOfChars = e.NewBoard.Letters.ConvertToJaggedArray(4, 4);
-            validateRequirementsToProcessing(sender, new RoutedEventArgs());
-        }
-
-        private async void LoadTheBase_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (vm.InProgress) return;
-            vm.InProgress = true;
-            vm.InformationBox = "Loading the base (it may take a while)...";
-
-            try
-            {
-                using (StreamReader file = new StreamReader(DICTIONARY_FILENAME))
-                {
-                    string line;
-
-                    while ((line = await file.ReadLineAsync()) != null)
-                    {
-                        Dictionary.Add(line);
-                    }
-                }
-
-                vm.IsBaseLoaded = true;
-                grid.Focus();
-                passwordBox.Focus();
-            }
-            catch (FileNotFoundException ex)
-            {
-                MessageBox.Show(String.Format("Not found dictionary file: \"{0}\" in program directory! Place the file and restart program!", ex.FileName) ,
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(String.Format("Error: {0}", ex), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                vm.InProgress = false;
+                await vm.LoadTheBase();
             }
         }
 
-        private async void validateRequirementsToProcessing(object sender, RoutedEventArgs e)
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            if (!vm.IsBaseLoaded)
-            {
-                MessageBox.Show("Load the base first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            base.OnClosing(e);
 
-            if (!vm.ValidateArray())
-            {
-                MessageBox.Show("Fill all of the fields first!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            this.arrayToProcess = vm.ArrayOfChars.ConvertTo2DArray(4, 4);
-
-            await BeginProcessing();
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            
-            Properties.Settings.Default.LastUsedEmail = vm.UserEmail;
+            Properties.Settings.Default.LastUsedEmail = emailBox.Text;
             Properties.Settings.Default.Save();
-            ni.Dispose();
+            _ni.Dispose();
         }
     }
 }

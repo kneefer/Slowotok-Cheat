@@ -141,12 +141,13 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Margin="0 0 10 0" Text="Email" Grid.Row="0" Grid.Column="0" />
-                        <TextBlock Text="Hasło" Grid.Row="2" Grid.Column="0" />
+                        <TextBlock Text="Password " Grid.Row="2" Grid.Column="0" />
                         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding UserEmail}" x:Name="emailBox" IsEnabled="{Binding IsLoggedIn, Converter={StaticResource InvertBooleanConverter}}" />
                         <PasswordBox x:Name="passwordBox" Grid.Row="2" Grid.Column="1" IsEnabled="{Binding IsLoggedIn, Converter={StaticResource InvertBooleanConverter}}" />
                     </Grid>
                     <Button IsDefault="True" IsEnabled="{Binding InProgress, Converter={StaticResource InvertBooleanConverter}}"
-                            Command="{Binding LogInCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=passwordBox}" Content="Login" Margin="70 5 70 0" />
+                            Command="{Binding LogInCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=passwordBox}"
+                            Content="Login" Margin="70 5 70 0" />
                 </StackPanel>
             </Expander>
 

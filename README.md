@@ -3,7 +3,11 @@ Słowotok Cheat
 
 Simple Cheat to the game named "Słowotok"
 
-Features (v2.0)
+##IMPORTANT
+Required file with the polish dictionary
+####https://dl.dropboxusercontent.com/u/41592085/slowa.txt
+
+##Features (v2.0)
 
 - generating all possible words to combine basing
   on the letters given by the game

@@ -1,4 +1,4 @@
-Slowotok-Cheat
+Słowotok Cheat
 ==============
 
 Simple Cheat to the game named "Słowotok"
